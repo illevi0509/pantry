@@ -1185,9 +1185,17 @@ function openSync(){
       <button class="btn" id="copy-url" type="button">העתקה</button>
       <button class="btn" id="cancel" type="button">סגירה</button>
     </div>
-    <p class="row-sub" style="margin-top:12px">באייפון: לפתוח את הקישור בספארי, ואז שיתוף ← "הוספה למסך הבית".</p>`;
+    <h3 class="cmp-h" style="margin-top:18px">הצטרפות לרשימה של מישהו אחר</h3>
+    <p class="row-sub" style="margin:0 0 8px">הדביקו כאן את הקישור שקיבלתם. הרשימה שבמכשיר הזה תוחלף ברשימה המשותפת.</p>
+    <div style="display:flex;gap:8px"><input class="field" id="join-url" dir="ltr" placeholder="https://…#h=…" style="flex:1"><button class="btn" id="join-btn" type="button">הצטרפות</button></div>`;
   $("#copy-url").onclick=async()=>{try{await navigator.clipboard.writeText(url);toast("הקישור הועתק")}catch(e){$("#share-url").select();toast("סמן והעתק ידנית")}};
   $("#cancel").onclick=closeSheet;
+  $("#join-btn").onclick=()=>{
+    const v=$("#join-url").value.trim(),m=v.match(/h=(h[a-z0-9]{20,40})/)||v.match(/^(h[a-z0-9]{20,40})$/);
+    if(!m){toast("זה לא נראה כמו קישור שיתוף");return}
+    if(m[1]===getHousehold()){toast("המכשיר כבר מחובר לרשימה הזו");return}
+    setHousehold(m[1]);items={};pending={};saveLocal();savePending();closeSheet();render();connect();toast("הצטרפת לרשימה המשותפת");
+  };
 }
 $("#sync-btn").onclick=openSync;
 loadLocal();const hashMsg=handleHash();render();connect();if(hashMsg)setTimeout(()=>toast(hashMsg),300);
