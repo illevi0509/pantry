@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>המזווה</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#3F7F5E">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="המזווה">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Secular+One&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<style>
+:root{
+  --bg:#F6F3ED; --surface:#FFFFFF; --sunk:#F1EDE5; --ink:#2A2F2C; --muted:#7B807B; --line:#E9E3D8;
+  --stock:#3F7F5E; --stock-soft:#E4F0E8; --stock-ink:#FFFFFF;
+  --out:#C8603F; --out-soft:#FBE8E0; --out-ink:#FFFFFF;
+  --list:#EDB94A; --list-ink:#3A2C06;
+  --shadow:0 1px 2px rgba(60,50,30,.05),0 6px 20px -12px rgba(60,50,30,.18);
+  --display:"Secular One","Arial Hebrew",Arial,sans-serif;
+  --body:"Assistant","Segoe UI",Arial,sans-serif;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#161816; --surface:#1F2220; --sunk:#262A27; --ink:#ECEAE4; --muted:#9A9F99; --line:#2E322F;
+    --stock:#6DB28C; --stock-soft:#22332A; --stock-ink:#0E1A13;
+    --out:#E88A6A; --out-soft:#3A2620; --out-ink:#21100A;
+    --list:#E3B246; --list-ink:#2A2105;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#161816; --surface:#1F2220; --sunk:#262A27; --ink:#ECEAE4; --muted:#9A9F99; --line:#2E322F;
+  --stock:#6DB28C; --stock-soft:#22332A; --stock-ink:#0E1A13;
+  --out:#E88A6A; --out-soft:#3A2620; --out-ink:#21100A;
+  --list:#E3B246; --list-ink:#2A2105;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6);
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.45;-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--stock);outline-offset:2px}
+img{max-width:100%}
+
+.wrap{max-width:640px;margin:0 auto;padding:18px 16px 150px}
+header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:4px 2px 14px;flex-wrap:wrap}
+header h1{font-family:var(--display);font-weight:400;font-size:34px;line-height:1;margin:0;letter-spacing:-.3px}
+.summary{color:var(--muted);margin:0;font-size:15px;flex-basis:100%}
+.theme-btn{border:0;background:var(--sunk);color:var(--ink);border-radius:999px;padding:6px 12px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+
+.tabs{display:flex;gap:4px;background:var(--sunk);border-radius:14px;padding:4px;margin-bottom:16px}
+.tab{flex:1;border:0;background:none;padding:9px 8px;border-radius:11px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;color:var(--muted);font-size:16px}
+.tab[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.badge{background:var(--list);color:var(--list-ink);border-radius:999px;font-size:13px;min-width:22px;padding:0 7px;line-height:20px}
+.badge:empty{display:none}
+
+.rows{background:var(--surface);border-radius:18px;overflow:hidden;box-shadow:var(--shadow)}
+.cat{font-family:var(--body);font-weight:700;font-size:13px;color:var(--muted);margin:0;padding:12px 16px 4px;display:flex;justify-content:space-between;letter-spacing:.2px}
+.cat:not(:first-child){border-top:6px solid var(--bg);padding-top:12px}
+.cat .n{font-weight:600;opacity:.8}
+.row{display:flex;align-items:center;gap:12px;padding:9px 14px}
+.row + .row{border-top:1px solid var(--line)}
+.thumb{width:42px;height:42px;border-radius:12px;object-fit:cover;flex:none;background:var(--sunk);display:grid;place-items:center;font-size:21px;line-height:1}
+.row-main{flex:1;min-width:0;background:none;border:0;text-align:start;padding:2px 0}
+.row-name{font-weight:600;font-size:16px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;unicode-bidi:plaintext}
+.row-sub{font-size:13px;color:var(--muted);display:block}
+.row-sub:empty{display:none}
+.row.empty .row-name{color:var(--muted)}
+.chip{display:inline-block;background:var(--list);color:var(--list-ink);font-size:12px;font-weight:700;border-radius:999px;padding:0 8px;line-height:19px;margin-top:3px}
+.search{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:0 12px;margin-bottom:12px;color:var(--muted)}
+.search[hidden]{display:none}
+.search input{flex:1;min-width:0;border:0;background:none;padding:11px 0;outline:none;color:var(--ink)}
+.list-tools.top{margin:0 0 12px}
+.search .q-add{padding:7px 14px;margin-inline-start:4px;border-radius:9px;font-size:15px}
+.search .q-add[hidden]{display:none}
+.suggest{margin-bottom:12px}
+.suggest .cat{padding-top:10px}
+.add-btn{flex:none;border:0;background:var(--stock-soft);color:var(--stock);font-weight:700;border-radius:999px;padding:6px 12px;font-size:14px}
+.deal{display:block;font-size:13px;line-height:1.35;color:var(--ink);margin-top:3px;unicode-bidi:plaintext}
+.deal b{font-weight:700;color:var(--out)}
+.deal s{color:var(--muted)}
+.deal-banner{background:var(--out-soft);color:var(--ink);border-radius:12px;padding:9px 13px;margin-bottom:12px;font-size:14px;font-weight:600}
+.deal-banner span{font-weight:400;color:var(--muted)}
+.stepper{display:flex;align-items:center;flex:none;background:var(--sunk);border-radius:999px;padding:2px}
+.stepper button{width:32px;height:32px;border-radius:50%;border:0;background:none;font-size:19px;line-height:1;color:var(--muted)}
+.stepper button:active{background:var(--surface)}
+.stepper.buy button{width:28px;height:28px;font-size:17px}
+.stepper.buy output{min-width:18px;font-size:14px}
+.stepper.buy output::before{content:"×";color:var(--muted);font-weight:400;margin-inline-end:1px}
+.stepper output{min-width:22px;text-align:center;font-weight:700;font-variant-numeric:tabular-nums;font-size:15px}
+
+.check{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);background:var(--surface);flex:none;display:grid;place-items:center;padding:0}
+.check svg{opacity:0}
+.row.bought .check{background:var(--stock);border-color:var(--stock)}
+.row.bought .check svg{opacity:1}
+.row.bought .row-name{text-decoration:line-through;color:var(--muted)}
+
+.empty-state{text-align:center;color:var(--muted);padding:40px 24px;background:var(--surface);border-radius:18px;box-shadow:var(--shadow)}
+.empty-state .big{font-size:40px;display:block;margin-bottom:6px}
+.empty-state strong{display:block;color:var(--ink);font-family:var(--display);font-weight:400;font-size:21px;margin-bottom:4px}
+
+.quick-add{display:flex;gap:8px;margin-bottom:14px}
+.quick-add input{flex:1;min-width:0}
+.field,.quick-add input,select{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.btn{border-radius:12px;padding:12px 16px;font-weight:700;background:var(--surface);border:1px solid var(--line);color:var(--ink)}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+a.btn{display:block}
+.btn.stock{background:var(--stock);color:var(--stock-ink);border-color:var(--stock)}
+.btn.out{background:var(--out);color:var(--out-ink);border-color:var(--out)}
+.btn.danger{color:var(--out);background:none}
+.btn[disabled]{opacity:.5}
+.list-tools{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0 0}
+.hint{font-size:13px;color:var(--muted);margin:10px 4px 0;text-align:center}
+.link{background:none;border:0;color:var(--muted);text-decoration:underline;text-underline-offset:3px;padding:6px 0}
+
+.rank{background:var(--sunk);border-radius:14px;overflow:hidden}
+.rank-row{display:flex;align-items:center;gap:12px;padding:11px 14px}
+.rank-row+.rank-row{border-top:1px solid var(--line)}
+.rank-row .pos{width:26px;height:26px;border-radius:50%;background:var(--surface);display:grid;place-items:center;font-weight:700;font-size:14px;flex:none}
+.rank-row.best{background:var(--stock-soft)}
+.rank-row.best .pos{background:var(--stock);color:var(--stock-ink)}
+.rk-main{flex:1;min-width:0}.rk-main b{display:block}.rk-main small{color:var(--muted);font-size:13px}
+.rk-sum{font-weight:700;font-variant-numeric:tabular-nums;font-size:18px;white-space:nowrap}
+.cmp-details{margin-top:14px}.cmp-details summary{cursor:pointer;font-weight:700;padding:6px 0}
+.cmp-table{margin:6px 0}   /* no overflow here: the sheet is the scroller, so the header row can stick to it */
+.cmp-table table{border-collapse:collapse;width:100%;font-size:13px}
+.cmp-table th,.cmp-table td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:start;vertical-align:top}
+.cmp-table th{color:var(--muted);font-weight:600;white-space:nowrap;position:sticky;top:-10px;background:var(--surface);z-index:2;box-shadow:0 1px 0 var(--line)}
+.cmp-table td:not(:first-child){white-space:nowrap;font-variant-numeric:tabular-nums}
+.cmp-table td.min{font-weight:700;color:var(--stock)}
+.cmp-table small{display:block;color:var(--out);font-size:11px;font-weight:400;unicode-bidi:plaintext;direction:rtl}
+/* the dock: the app's two verbs */
+.dock{position:fixed;inset-inline:0;bottom:0;padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(--bg) 65%,transparent)}
+.dock-inner{max-width:640px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.verb{border:0;border-radius:18px;padding:11px 12px;margin:0;display:flex;align-items:center;gap:11px;text-align:start;box-shadow:var(--shadow);cursor:pointer;font-size:17px;font-weight:400;-webkit-user-select:none;user-select:none;background:var(--surface)}
+.cam-input{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none}
+.verb .ico{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;flex:none}
+.verb b{font-family:var(--display);font-weight:400;font-size:21px;line-height:1.05;display:block}
+.verb small{font-size:13px;color:var(--muted)}
+.verb.stock{background:var(--stock-soft)}
+.verb.stock b{color:var(--stock)}
+.verb.stock .ico{background:var(--stock);color:var(--stock-ink)}
+.verb.out{background:var(--out-soft)}
+.verb.out b{color:var(--out)}
+.verb.out .ico{background:var(--out);color:var(--out-ink)}
+.verb:active{transform:scale(.98)}
+
+
+/* ---- v2: bottom tab bar (tabs at the edges, the two camera verbs in the middle) ---- */
+.dock{position:fixed;inset-inline:0;bottom:0;padding:0 0 env(safe-area-inset-bottom,0px);background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -6px 20px -14px rgba(60,50,30,.25);z-index:10}
+.bar{max-width:640px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;align-items:end;padding:6px 8px 8px}
+.navtab,.navact{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12px;font-weight:700;color:var(--muted);padding:4px 0;cursor:pointer;position:relative;-webkit-user-select:none;user-select:none;margin:0}
+.navtab[aria-selected="true"]{color:var(--stock)}
+.navtab .badge{position:absolute;top:0;inset-inline-end:calc(50% - 24px);font-size:11px;line-height:17px;min-width:18px;padding:0 5px}
+.navact .fab{width:52px;height:52px;border-radius:18px;display:grid;place-items:center;margin-top:-22px;box-shadow:0 6px 16px -6px rgba(0,0,0,.35);border:3px solid var(--surface)}
+.navact.add .fab{background:var(--stock);color:var(--stock-ink)}
+.navact.out .fab{background:var(--out);color:var(--out-ink)}
+.navact.add{color:var(--stock)}.navact.out{color:var(--out)}
+.navact:active .fab{transform:scale(.95)}
+.wrap{padding-bottom:120px}
+header{margin:2px 2px 12px}
+header h1{font-size:28px}
+.theme-btn{font-size:16px;padding:6px 10px}
+/* ---- v2: shopping list as tiles ---- */
+.tile-cat{font-size:13px;font-weight:700;color:var(--muted);margin:14px 4px 6px;display:flex;justify-content:space-between}
+.tile-cat:first-of-type{margin-top:4px}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tile{position:relative;background:var(--surface);border-radius:16px;box-shadow:var(--shadow);padding:12px 8px 10px;min-height:118px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;cursor:pointer;transition:transform .15s,opacity .3s;-webkit-user-select:none;user-select:none}
+.tile:active{transform:scale(.96)}
+.tile .em{font-size:32px;line-height:1.1}
+.tile .em img{width:40px;height:40px;border-radius:10px;object-fit:cover}
+.tile .nm{font-size:13.5px;font-weight:600;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;unicode-bidi:plaintext}
+.tile .qb{position:absolute;top:8px;inset-inline-start:8px;background:var(--ink);color:var(--surface);font-size:12px;font-weight:700;border-radius:999px;padding:0 7px;line-height:20px}
+.tile .tag{font-size:11px;color:var(--out);font-weight:700;line-height:1.2;unicode-bidi:plaintext}
+.tile .more{position:absolute;top:4px;inset-inline-end:4px;width:30px;height:30px;border:0;background:none;color:var(--muted);font-size:18px;border-radius:50%;line-height:1}
+.tile.has-deal{box-shadow:var(--shadow),inset 0 0 0 2px var(--out-soft)}
+.tile.bought{opacity:.35;transform:scale(.92)}
+.tile.bought .nm{text-decoration:line-through}
+.toast .undo{background:none;border:0;color:var(--list);font-weight:700;margin-inline-start:12px;padding:0;font-size:15px}
+
+.stepper.big{display:inline-flex}.stepper.big button{width:40px;height:40px;font-size:22px}.stepper.big output{min-width:34px;font-size:17px}
+.deals-box{background:var(--sunk);border-radius:12px;padding:8px 12px}
+.view-toggle{display:flex;gap:4px;background:var(--sunk);border-radius:10px;padding:3px;margin:0 0 10px;width:max-content;margin-inline-start:auto}
+.view-toggle button{border:0;background:none;padding:5px 12px;border-radius:8px;font-size:13px;font-weight:700;color:var(--muted)}
+.view-toggle button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.imp-list{display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow:auto;padding:2px}
+.imp-row{background:var(--sunk);border-radius:12px;padding:9px 11px;display:flex;flex-direction:column;gap:6px}
+.imp-row.off{opacity:.45}
+.imp-on{display:flex;align-items:center;gap:8px;margin:0;color:var(--ink);font-size:15px;font-weight:700}
+.imp-on input{width:20px;height:20px;accent-color:var(--stock)}
+.imp-row select{padding:8px 10px;font-size:14px}
+.cmp-tabs{margin:0 0 12px;margin-inline-start:0}
+.cmp-h{font-size:15px;font-weight:700;margin:16px 2px 8px;display:flex;justify-content:space-between;gap:8px}.cmp-h span{font-weight:400;font-size:13px;color:var(--muted)}
+.hdr-btns{display:flex;gap:6px}
+.pc-res{display:flex;flex-direction:column;gap:10px}
+.pc{background:var(--sunk);border-radius:14px;padding:10px 12px}
+.pc-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.pc-em{font-size:22px}.pc-name{flex:1;min-width:0;font-size:15px;line-height:1.3;unicode-bidi:plaintext}
+.pc-rows{display:flex;flex-direction:column}
+.pc-row{display:grid;grid-template-columns:76px 1fr;gap:2px 8px;padding:6px 2px;border-top:1px solid var(--line);font-size:14px}
+.pc-row.na{color:var(--muted)}
+.pc-row.min .pc-price{color:var(--stock);font-weight:700}
+.pc-chain{font-weight:600}
+.pc-price s{color:var(--muted);font-weight:400}
+.pc-deal{grid-column:2;font-size:12.5px;color:var(--out);unicode-bidi:plaintext}
+/* sheet */
+.backdrop{position:fixed;inset:0;background:rgba(30,25,15,.4);display:flex;align-items:flex-end;justify-content:center;z-index:20}
+.backdrop[hidden]{display:none}
+.sheet{background:var(--surface);width:100%;max-width:640px;max-height:92%;overflow:auto;border-radius:24px 24px 0 0;padding:10px 18px calc(20px + env(safe-area-inset-bottom,0px));animation:up .22s ease-out}
+.sheet::before{content:"";display:block;width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 14px}
+@keyframes up{from{transform:translateY(30px);opacity:0}}
+@media (prefers-reduced-motion:reduce){.sheet{animation:none}}
+.sheet h2{font-family:var(--display);font-weight:400;font-size:24px;margin:0 0 12px}
+.photo{width:100%;max-height:220px;object-fit:contain;border-radius:14px;background:var(--sunk);display:block;margin-bottom:12px}
+.status{display:flex;align-items:center;gap:10px;color:var(--muted);margin:4px 0 14px;min-height:24px}
+.spin{width:18px;height:18px;border:3px solid var(--line);border-top-color:var(--stock);border-radius:50%;animation:sp 0.8s linear infinite;flex:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+label{display:block;font-size:14px;font-weight:600;color:var(--muted);margin:12px 0 5px}
+.match{display:flex;align-items:center;gap:12px;background:var(--sunk);border-radius:14px;padding:10px;margin:6px 0}
+.match .row-sub{font-size:14px}
+.actions{display:flex;flex-direction:column;gap:8px;margin-top:18px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.code{font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate}
+
+.toast{position:fixed;inset-inline:16px;bottom:calc(100px + env(safe-area-inset-bottom,0px));margin:0 auto;max-width:420px;background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:14px;text-align:center;z-index:30;transition:opacity .2s;box-shadow:var(--shadow)}
+.toast[hidden]{display:none}
+#qr-hidden{position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>המזווה 🧺</h1>
+    <div class="hdr-btns"><button class="theme-btn" id="price-btn" type="button" aria-label="בדיקת מחיר ומבצעים">🏷️ בדיקת מחיר</button><button class="theme-btn" id="sync-btn" type="button" aria-label="סנכרון ושיתוף">👥</button><button class="theme-btn" id="theme-btn" type="button"></button></div>
+    <p class="summary" id="summary">טוען…</p>
+  </header>
+  <form class="search" id="search-wrap" hidden>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <input id="q" type="search" placeholder="חיפוש במלאי" autocomplete="off" aria-label="חיפוש במלאי" enterkeyhint="search">
+    <button class="btn primary q-add" id="q-add" type="submit" hidden>הוסף</button>
+  </form>
+  <main id="view"></main>
+</div>
+
+<nav class="dock" aria-label="ניווט ופעולות">
+  <div class="bar" role="tablist">
+    <button class="navtab" role="tab" id="tab-stock" aria-selected="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg><span>במלאי</span></button>
+    <label class="navact add" id="btn-add" for="cam-add" role="button" tabindex="0"><span class="fab"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><path d="M12 10.5v5M9.5 13h5"/></svg></span><span>יש לי</span></label>
+    <label class="navact out" id="btn-out" for="cam-out" role="button" tabindex="0"><span class="fab"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><path d="M9.5 13h5"/></svg></span><span>נגמר</span></label>
+    <button class="navtab" role="tab" id="tab-list" aria-selected="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg><span>רשימה</span><span class="badge" id="list-count"></span></button>
+  </div>
+</nav>
+
+<input type="file" class="cam-input" id="cam-add" accept="image/*" capture="environment" tabindex="-1" aria-hidden="true">
+<input type="file" class="cam-input" id="cam-out" accept="image/*" capture="environment" tabindex="-1" aria-hidden="true">
+<div id="qr-hidden"></div>
+<div class="backdrop" id="backdrop" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const CATS=["מוצרי חלב","ירקות ופירות","בשר ודגים","לחם ומאפים","יבשים ושימורים","תבלינים ורטבים","חטיפים ומתוקים","משקאות","קפואים","ניקיון","היגיינה","תינוקות","חיות מחמד","אחר"];
+const LS_KEY="pantry.v1";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const newId=()=>"p"+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+
+/* ---------- storage: local cache + db sync, with an outbox so offline changes survive ----------
+   Every change is saved on the device and queued in `pending` (persisted). A queued change is removed
+   only after the server confirms it. Snapshots from the server are merged *under* the queue, so a
+   snapshot that arrives before the queue drains can never overwrite a change made offline. */
+let items={};
+let remote=null;
+const PENDING_KEY="pantry.pending.v1";
+let pending={};            // id -> {op:"set",item,ts} | {op:"del",ts}
+let lastRemote=null;       // last server snapshot (by id), to re-merge when the queue changes
+function loadLocal(){
+  try{items=JSON.parse(localStorage.getItem(LS_KEY)||"{}")||{}}catch(e){items={}}
+  try{pending=JSON.parse(localStorage.getItem(PENDING_KEY)||"{}")||{}}catch(e){pending={}}
+}
+function saveLocal(){try{localStorage.setItem(LS_KEY,JSON.stringify(items))}catch(e){}}
+function savePending(){try{localStorage.setItem(PENDING_KEY,JSON.stringify(pending))}catch(e){}}
+const pendingCount=()=>Object.keys(pending).length;
+const withTimeout=(p,ms)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error("timeout")),ms))]);
+
+function queue(id,entry){pending[id]={...entry,ts:Date.now()};savePending()}
+async function pushOne(id){
+  const e=pending[id];if(!e||!remote)return false;
+  try{
+    if(e.op==="set") await withTimeout(remote.doc(id).set(e.item),15000);
+    else await withTimeout(remote.doc(id).delete(),15000);
+    if(pending[id]&&pending[id].ts===e.ts){delete pending[id];savePending()}   // only if nothing newer was queued meanwhile
+    return true;
+  }catch(err){return false}
+}
+let flushing=false;
+async function flushPending(){
+  if(flushing||!remote||!pendingCount())return;
+  flushing=true;
+  try{for(const id of Object.keys(pending)){if(!(await pushOne(id)))break}}
+  finally{flushing=false;render()}
+}
+async function putItem(it){
+  it.updatedAt=Date.now(); items[it.id]=it; saveLocal();
+  queue(it.id,{op:"set",item:it}); render();
+  if(await pushOne(it.id)) render();
+}
+async function removeItem(id){
+  delete items[id]; saveLocal();
+  queue(id,{op:"del"}); render();
+  if(await pushOne(id)) render();
+}
+function mergeRemote(next){
+  const merged={...next};
+  for(const id in pending){const e=pending[id];if(e.op==="set")merged[id]=e.item;else delete merged[id]}
+  return merged;
+}
+/* ---------- Firebase: anonymous sign-in + one shared "household" (a long random id, shared by link) ----------
+   Path: households/{hid}/items/{itemId}. Whoever has the household link can read and write it; nobody can list households. */
+const FB_CONFIG={apiKey:"AIzaSyA4yCyHFPgH57UWEiCL2RHzikL3cpwdfV8",authDomain:"il-pantry.firebaseapp.com",projectId:"il-pantry",
+  storageBucket:"il-pantry.firebasestorage.app",messagingSenderId:"221919514401",appId:"1:221919514401:web:ac8e815e2242b6ec147860"};
+const FB="https://www.gstatic.com/firebasejs/10.14.1/";
+const HH_KEY="pantry.household";
+let syncState="off";        // off | connecting | live | error
+let syncError="";
+function getHousehold(){try{return localStorage.getItem(HH_KEY)||""}catch(e){return""}}
+function setHousehold(h){try{localStorage.setItem(HH_KEY,h)}catch(e){}}
+function newHousehold(){const a=new Uint8Array(18);crypto.getRandomValues(a);return "h"+[...a].map(x=>x.toString(36).padStart(2,"0")).join("").slice(0,30)}
+const shareUrl=()=>location.origin+location.pathname+"#h="+getHousehold();
+let unsub=null;
+async function connect(){
+  let hid=getHousehold();
+  if(!hid){hid=newHousehold();setHousehold(hid)}
+  syncState="connecting";syncError="";
+  try{
+    const [{initializeApp,getApps},{getAuth,signInAnonymously,onAuthStateChanged},fs]=await Promise.all([
+      import(FB+"firebase-app.js"),import(FB+"firebase-auth.js"),import(FB+"firebase-firestore.js")]);
+    const app=getApps()[0]||initializeApp(FB_CONFIG);
+    const auth=getAuth(app);
+    await withTimeout(new Promise((res,rej)=>{const off=onAuthStateChanged(auth,u=>{if(u){off();res(u)}});signInAnonymously(auth).catch(rej)}),20000);
+    const db=fs.getFirestore(app);
+    const colRef=fs.collection(db,"households",hid,"items");
+    // same shape the rest of the app expects: remote.doc(id).set(v) / .delete()
+    remote={doc:id=>({set:v=>fs.setDoc(fs.doc(colRef,id),JSON.parse(JSON.stringify(v))),delete:()=>fs.deleteDoc(fs.doc(colRef,id))})};
+    let first=true;
+    if(unsub)unsub();
+    unsub=fs.onSnapshot(colRef,snap=>{
+      const next={};
+      snap.docs.forEach(d=>{const v=d.data(); if(v&&v.id) next[d.id]=v});
+      if(first){
+        first=false;
+        // first time this household syncs: upload what is on this device
+        if(Object.keys(next).length===0) for(const i of Object.values(items)) if(!pending[i.id]) queue(i.id,{op:"set",item:i});
+      }
+      syncState="live";
+      lastRemote=next;
+      items=mergeRemote(next); saveLocal(); render();
+      flushPending();
+    },err=>{syncState="error";syncError=err&&err.code||String(err);render()});
+    flushPending();
+  }catch(e){syncState="error";syncError=e&&(e.code||e.message)||String(e);render()}
+}
+window.addEventListener("online",()=>flushPending());
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)flushPending()});
+setInterval(()=>{if(pendingCount())flushPending()},30000);
+
+/* ---------- Claude (photo recognition) ---------- */
+let samplePromise=null;
+function getSample(){
+  if(!samplePromise) samplePromise=Promise.resolve(null);   // photo recognition needs Claude; not available in the standalone app
+  return samplePromise;
+}
+async function identify(blob){
+  const sample=await getSample(); if(!sample) return {error:"unavailable"};
+  const inv=Object.values(items).map(i=>({id:i.id,name:i.name}));
+  const prompt=`You are the recognition step of a home pantry app used in Israel.
+The attached photo shows one grocery or household product (front of package, its barcode, or the product itself).
+Return ONLY a JSON object, no prose:
+{"name": short product name in Hebrew, with brand and size if visible (e.g. "חלב תנובה 3% 1 ליטר"), or "" if you cannot tell,
+ "category": exactly one of ${JSON.stringify(CATS)},
+ "barcode": the barcode digits if clearly readable in the photo, else null,
+ "matchId": the id of the item from the inventory below that is the same product, else null}
+Inventory: ${JSON.stringify(inv)}`;
+  try{
+    const r=await sample.json(prompt,{images:[blob],modelTier:"quick"});
+    return r&&typeof r==="object"?r:{error:"bad"};
+  }catch(e){return {error:e&&e.code||"failed"}}
+}
+
+/* ---------- image + barcode ---------- */
+function loadImg(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file);const im=new Image();im.onload=()=>res({im,u});im.onerror=rej;im.src=u})}
+function drawScaled(im,max){const s=Math.min(1,max/Math.max(im.naturalWidth,im.naturalHeight));const c=document.createElement("canvas");c.width=Math.round(im.naturalWidth*s);c.height=Math.round(im.naturalHeight*s);c.getContext("2d").drawImage(im,0,0,c.width,c.height);return c}
+function squareThumb(im,size){const c=document.createElement("canvas");c.width=c.height=size;const w=im.naturalWidth,h=im.naturalHeight,m=Math.min(w,h);c.getContext("2d").drawImage(im,(w-m)/2,(h-m)/2,m,m,0,0,size,size);return c.toDataURL("image/jpeg",.72)}
+async function prepImage(file){
+  const {im,u}=await loadImg(file);
+  const big=drawScaled(im,1280);
+  const blob=await new Promise(r=>big.toBlob(r,"image/jpeg",.85));
+  return {blob,thumb:squareThumb(im,112),url:u};
+}
+async function readBarcode(file){
+  if("BarcodeDetector" in window){
+    try{
+      const det=new BarcodeDetector({formats:["ean_13","ean_8","upc_a","upc_e","code_128","code_39","itf"]});
+      const r=await det.detect(await createImageBitmap(file));
+      if(r&&r[0]&&r[0].rawValue) return r[0].rawValue;
+    }catch(e){}
+  }
+  if(window.Html5Qrcode){
+    try{const q=new Html5Qrcode("qr-hidden");const t=await q.scanFile(file,false);try{q.clear()}catch(e){}if(t)return String(t).trim()}catch(e){}
+  }
+  return null;
+}
+const byBarcode=code=>Object.values(items).find(i=>(i.barcodes||[]).includes(code));
+
+/* ---------- product catalog (barcode -> Hebrew name), built from a chain's PriceFull file ---------- */
+let catalogPromise=null;
+function getCatalog(){
+  if(!catalogPromise) catalogPromise=fetch("catalog.json").then(r=>r.ok?r.json():null).then(j=>{
+    if(!j||!j.items) return null;
+    return {items:j.items,cats:j.cats||CATS,source:j.source||""};
+  }).catch(()=>null);
+  return catalogPromise;
+}
+async function catalogLookup(code){
+  const cat=await getCatalog(); if(!cat||!code) return null;
+  const key=String(code).replace(/\D/g,"").replace(/^0+/,"");
+  const hit=cat.items[key]; if(!hit) return null;
+  const c=cat.cats[hit[1]];
+  return {name:hit[0],category:CATS.includes(c)?c:"אחר"};
+}
+const byName=name=>{const n=name.trim();return Object.values(items).find(i=>i.name.trim()===n)};
+
+/* ---------- views ---------- */
+let tab="stock";
+const bought=new Set();
+function groupByCat(list){
+  const g={};list.forEach(i=>{(g[i.category]||(g[i.category]=[])).push(i)});
+  return CATS.filter(c=>g[c]).map(c=>[c,g[c].sort((a,b)=>a.name.localeCompare(b.name,"he"))]);
+}
+const CAT_ICON={"מוצרי חלב":"🥛","ירקות ופירות":"🥕","בשר ודגים":"🍗","לחם ומאפים":"🍞","יבשים ושימורים":"🥫","תבלינים ורטבים":"🧂","חטיפים ומתוקים":"🍫","משקאות":"🧃","קפואים":"🧊","ניקיון":"🧽","היגיינה":"🧴","תינוקות":"👶","חיות מחמד":"🐾","אחר":"🛒"};
+/* a photo is shown only for products without a barcode: for barcoded ones the saved photo is usually the barcode itself */
+const showThumb=i=>!!(i.thumb&&!(i.barcodes||[]).length);
+function thumbHtml(i){return showThumb(i)?`<img class="thumb" src="${i.thumb}" alt="">`:`<span class="thumb" aria-hidden="true">${CAT_ICON[i.category]||"🛒"}</span>`}
+/* how many units to buy (shopping list only); defaults to 1 */
+const bq=i=>Math.max(1,parseInt(i&&i.buyQty)||1);
+const withQty=i=>bq(i)>1?`${bq(i)} ${i.name}`:i.name;
+/* ---------- autocomplete from the chains' catalog (adds the product WITH its barcode, so deals/prices match) ---------- */
+let catIndex=null,catIndexLoading=false;
+let catIndexPromise=null;
+function loadCatIndex(){
+  if(!catIndexPromise)catIndexPromise=Promise.all([getCatalog(),loadPrices()]).then(([cat])=>{
+    if(!cat){catIndexPromise=null;return null}
+    catIndex=Object.entries(cat.items).map(([k,v])=>({k,name:v[0],n:norm(v[0]),cat:CATS.includes(cat.cats[v[1]])?cat.cats[v[1]]:"אחר"}));
+    return catIndex;
+  });
+  return catIndexPromise;
+}
+function ensureCatIndex(){
+  if(catIndex||catIndexLoading)return;catIndexLoading=true;
+  loadCatIndex().then(ix=>{catIndexLoading=false;if(ix&&tab==="list"&&$("#q").value.trim().length>=2)render()});
+}
+function catalogSuggest(raw){
+  const q=norm(raw);if(q.length<2)return [];
+  if(!catIndex){ensureCatIndex();return []}
+  const words=q.split(" ").filter(Boolean);
+  const have=new Set();Object.values(items).forEach(i=>(i.barcodes||[]).forEach(b=>have.add(String(b).replace(/^0+/,""))));
+  const P=pricesData&&pricesData.prices;
+  const hits=[];
+  for(const c of catIndex){
+    if(have.has(c.k))continue;
+    if(!words.every(w=>c.n.includes(w)))continue;
+    const pr=P&&P[c.k]?P[c.k].filter(x=>x!=null):[];
+    const score=(c.n.startsWith(q)?30:0)+(c.n.startsWith(words[0])?20:0)+pr.length*25-c.name.length/10;
+    hits.push({...c,score,pr});
+  }
+  hits.sort((a,b)=>b.score-a.score);
+  return hits.slice(0,8).map(h=>({...h,info:h.pr.length?`${h.pr.length===1?"ברשת אחת":`ב-${h.pr.length} רשתות`} · מ-₪${fmtNis(Math.min(...h.pr))}`:""}));
+}
+/* options for one imported line: the same product family ("שמן זית" → olive oils, not tuna IN olive oil),
+   sold in at least `minChains` of the chains so the basket comparison can use it */
+function catalogOptions(raw,minChains=3,limit=12){
+  const q=norm(raw);if(q.length<2||!catIndex)return [];
+  const P=pricesData&&pricesData.prices;if(!P)return [];
+  const STOP=new Set(["עם","בתוספת","של","מ","ב","ו","וב","ללא","בטעם"]);
+  const hits=[];
+  for(const c of catIndex){
+    let at=-1,from=0;
+    // whole words only: "דג" must not match "דגני בוקר", "חלב" not "חלבון"
+    while((at=c.n.indexOf(q,from))!==-1){const nx=c.n[at+q.length];if((at===0||c.n[at-1]===" ")&&(nx===undefined||!/[\p{L}\p{N}]/u.test(nx)))break;from=at+1}
+    if(at===-1)continue;                                  // the phrase must start a word ("בשמן זית" does not count)
+    if(at>0){const prev=c.n.slice(0,at).trim().split(" ").pop();if(STOP.has(prev))continue}
+    const pr=P[c.k]?P[c.k].filter(x=>x!=null):[];
+    if(pr.length<minChains)continue;
+    hits.push({...c,pr,starts:at===0,min:Math.min(...pr)});
+  }
+  hits.sort((a,b)=>(b.starts-a.starts)||(b.pr.length-a.pr.length)||(a.min-b.min));
+  // names that START with the phrase are the product itself; when there are a few, drop the ones where it is only an ingredient
+  const starting=hits.filter(h=>h.starts);
+  const pool=starting.length>=2?starting:hits;
+  const seen=new Set(),uniq=pool.filter(h=>{const k=h.n;if(seen.has(k))return false;seen.add(k);return true});
+  return uniq.slice(0,limit).map(h=>({...h,info:`ב-${h.pr.length} רשתות · מ-₪${fmtNis(h.min)}`}));
+}
+function addFromCatalog(k){
+  const c=catIndex&&catIndex.find(x=>x.k===k);if(!c)return;
+  const ex=Object.values(items).find(i=>(i.barcodes||[]).some(b=>String(b).replace(/^0+/,"")===k));
+  if(ex){putItem({...ex,onList:true})}
+  else putItem({id:newId(),name:c.name,category:c.cat,qty:0,onList:true,barcodes:[k]});
+  toast(`${c.name} נוסף לרשימה`);$("#q").value="";render();
+}
+/* shopping-list layout: tiles or rows, remembered per device */
+let listView="tiles";try{listView=localStorage.getItem("pantry.listView")||"tiles"}catch(e){}
+/* search: case/space/geresh-insensitive substring match */
+const norm=s=>String(s||"").toLowerCase().replace(/[׳'"״`]/g,"").replace(/\s+/g," ").trim();
+const catHead=(c,n)=>`<h3 class="cat"><span>${esc(c)}</span><span class="n">${n}</span></h3>`;
+
+/* ---------- deals: active promotions per barcode, built from chains' PromoFull files ---------- */
+let deals=null,dealsLoading=false,nameToCode=null;
+function loadDeals(){
+  if(deals||dealsLoading)return;dealsLoading=true;
+  fetch("deals.json").then(r=>r.ok?r.json():null).then(j=>{if(j&&j.deals){deals=j;render()}}).catch(()=>{});
+  getCatalog().then(cat=>{if(!cat)return;nameToCode=new Map();for(const k in cat.items)if(!nameToCode.has(cat.items[k][0]))nameToCode.set(cat.items[k][0],k);if(deals)render()});
+}
+const todayISO=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+const fmtNis=n=>Number(n).toFixed(2).replace(/\.00$/,"");
+const fmtDate=iso=>{const[y,m,d]=iso.split("-");return `${+d}.${+m}`};
+function dealsFor(i){
+  if(!deals)return [];
+  const codes=[...(i.barcodes||[])].map(c=>String(c).replace(/\D/g,"").replace(/^0+/,""));
+  if(!codes.length&&nameToCode&&nameToCode.has(i.name))codes.push(nameToCode.get(i.name));
+  const t=todayISO(),out=[];
+  for(const k of codes){const d=deals.deals[k];if(!d)continue;
+    for(const ci in d){const [mq,tot,reg,end,club,cond]=d[ci];if(end<t)continue;
+      out.push({chain:deals.chains[+ci],mq,tot,reg,end,club,cond,unit:tot/mq})}}
+  return out.sort((a,b)=>a.unit-b.unit).slice(0,3);
+}
+function dealHtml(x){
+  const price=x.mq>1?`${x.mq} ב-${fmtNis(x.tot)} ₪`:`${fmtNis(x.tot)} ₪`;
+  const was=x.reg?` <s>${fmtNis(x.reg)}</s>`:"";
+  return `<span class="deal">🏷️ <b>${esc(x.chain)}:</b> ${price}${was} · עד ${fmtDate(x.end)}${x.club?" · מועדון":""}${x.cond?" · בתנאי":""}</span>`;
+}
+function render(){
+  const all=Object.values(items);
+  const stock=all.filter(i=>i.qty>0||!i.onList);
+  const list=all.filter(i=>i.onList);
+  $("#list-count").textContent=list.length||"";
+  const pc=pendingCount();
+  $("#summary").textContent=(all.length?`${all.filter(i=>i.qty>0).length} מוצרים במלאי, ${list.length} ברשימת הקניות`:"המלאי והרשימה שלך, בצילום אחד")+(pc?` · ⏳ ${pc} ${pc===1?"שינוי ממתין":"שינויים ממתינים"} לסנכרון`:"")+(syncState==="error"?" · ⚠️ הסנכרון לא פעיל":"");
+  const sb=$("#sync-btn");if(sb)sb.textContent=syncState==="live"?"👥":syncState==="error"?"⚠️":"⏳";
+  $("#tab-stock").setAttribute("aria-selected",tab==="stock");
+  $("#tab-list").setAttribute("aria-selected",tab==="list");
+  const v=$("#view");
+  $("#search-wrap").hidden=tab==="stock"&&!stock.length;
+  $("#q-add").hidden=tab!=="list";
+  if(tab==="stock"){
+    if(!stock.length){v.innerHTML=`<div class="empty-state"><span class="big" aria-hidden="true">🧺</span><strong>המזווה ריק</strong>לחץ על "יש לי" וצלם מוצר או ברקוד כדי להוסיף אותו.</div>`;return}
+    const qn=norm($("#q").value);
+    const shown=qn?stock.filter(i=>norm(i.name).includes(qn)):stock;
+    if(!shown.length){v.innerHTML=`<div class="empty-state"><span class="big" aria-hidden="true">🔍</span><strong>לא נמצא</strong>אין במלאי מוצר שמתאים ל"${esc($("#q").value.trim())}".</div>`;return}
+    v.innerHTML=`<div class="rows">`+groupByCat(shown).map(([c,arr])=>catHead(c,arr.length)+arr.map(i=>`
+      <div class="row ${i.qty<=0?"empty":""}">
+        ${thumbHtml(i)}
+        <button class="row-main" data-edit="${i.id}"><span class="row-name">${esc(i.name)}</span>${i.qty<=0?`<span class="row-sub">אזל</span>`:""}${i.onList?`<span class="chip">ברשימה</span>`:""}</button>
+        <div class="stepper"><button data-dec="${i.id}" aria-label="פחות ${esc(i.name)}">−</button><output>${i.qty}</output><button data-inc="${i.id}" aria-label="עוד ${esc(i.name)}">+</button></div>
+      </div>`).join("")).join("")+`</div>`;
+  }else{
+    const raw=$("#q").value.trim(),qn=norm(raw);
+    // products you already know (in stock, not yet on the list) that match what you typed: one tap adds them
+    const sugg=qn?all.filter(i=>!i.onList&&norm(i.name).includes(qn)).slice(0,5):[];
+    const suggHtml=sugg.length?`<div class="rows suggest"><h3 class="cat"><span>להוסיף מהמלאי?</span></h3>${sugg.map(i=>`
+      <div class="row">${thumbHtml(i)}<span class="row-main"><span class="row-name">${esc(i.name)}</span><span class="row-sub">יש בבית ${i.qty}</span></span><button class="add-btn" data-addlist="${i.id}">+ לרשימה</button></div>`).join("")}</div>`:"";
+    const csug=catalogSuggest(raw);
+    const csugHtml=csug.length?`<div class="rows suggest"><h3 class="cat"><span>מהקטלוג</span><span class="n">בחר כדי להוסיף עם ברקוד</span></h3>${csug.map(c=>`
+      <div class="row"><span class="thumb" aria-hidden="true">${CAT_ICON[c.cat]||"🛒"}</span><span class="row-main"><span class="row-name">${esc(c.name)}</span>${c.info?`<span class="row-sub">${c.info}</span>`:""}</span><button class="add-btn" data-addcat="${c.k}">+ לרשימה</button></div>`).join("")}</div>`:"";
+    const shownList=qn?list.filter(i=>norm(i.name).includes(qn)):list;
+    const allSugg=suggHtml+csugHtml;
+    if(!list.length&&!qn){v.innerHTML=`<div class="empty-state"><span class="big" aria-hidden="true">✨</span><strong>אין מה לקנות</strong>מוצר שתצלם עם "נגמר" יופיע כאן, או הקלד שם למעלה ולחץ "הוסף".</div><div class="list-tools"><button class="btn" id="import" style="grid-column:1/-1">📥 ייבוא רשימה (מוואטסאפ, מייל או פתקים)</button></div>`;$("#import").onclick=openImport;return}
+    if(!shownList.length){v.innerHTML=allSugg+`<div class="empty-state"><span class="big" aria-hidden="true">🔍</span><strong>"${esc(raw)}" לא ברשימה</strong>לחץ "הוסף" למעלה כדי להוסיף אותו.</div>`;return}
+    loadDeals();
+    const withDeals=deals?list.filter(i=>dealsFor(i).length).length:0;
+    const banner=deals?`<div class="deal-banner">🏷️ ${withDeals?`${withDeals} מוצרים ברשימה במבצע`:"אין כרגע מבצעים על מוצרים ברשימה"} <span>· מבצעים נכון ל-${fmtDate(deals.built)}</span></div>`:"";
+    const tools=`<div class="list-tools top"><button class="btn stock" id="compare">השוואת מחירים</button><button class="btn" id="share">שליחת הרשימה</button><button class="btn" id="import" style="grid-column:1/-1">📥 ייבוא רשימה (מוואטסאפ, מייל או פתקים)</button></div>`;
+    const tileHtml=i=>{const ds=dealsFor(i),d=ds[0];
+      return `<div class="tile ${bought.has(i.id)?"bought":""} ${d?"has-deal":""}" data-buy="${i.id}" role="button" tabindex="0" aria-label="נקנה: ${esc(i.name)}">
+        ${bq(i)>1?`<span class="qb">×${bq(i)}</span>`:""}
+        <button class="more" data-edit="${i.id}" aria-label="פרטים: ${esc(i.name)}">⋯</button>
+        <span class="em">${showThumb(i)?`<img src="${i.thumb}" alt="">`:(CAT_ICON[i.category]||"🛒")}</span>
+        <span class="nm">${esc(i.name)}</span>
+        ${d?`<span class="tag">🏷️ ${esc(d.chain)} ${d.mq>1?`${d.mq} ב־${fmtNis(d.tot)}`:`₪${fmtNis(d.tot)}`}</span>`:""}
+      </div>`};
+    const rowHtml=i=>`
+      <div class="row ${bought.has(i.id)?"bought":""}">
+        <button class="check" data-buy="${i.id}" aria-label="נקנה: ${esc(i.name)}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></button>
+        ${thumbHtml(i)}
+        <button class="row-main" data-edit="${i.id}"><span class="row-name">${esc(i.name)}</span><span class="row-sub">${i.qty>0?`יש בבית ${i.qty}`:""}</span>${dealsFor(i).map(dealHtml).join("")}</button>
+        <div class="stepper buy" aria-label="כמה לקנות"><button data-bdec="${i.id}" aria-label="פחות ${esc(i.name)} לקנייה">−</button><output>${bq(i)}</output><button data-binc="${i.id}" aria-label="עוד ${esc(i.name)} לקנייה">+</button></div>
+      </div>`;
+    const viewToggle=qn?"":`<div class="view-toggle" role="group" aria-label="תצוגת הרשימה"><button data-view="tiles" aria-pressed="${listView==="tiles"}">▦ אריחים</button><button data-view="rows" aria-pressed="${listView==="rows"}">☰ שורות</button></div>`;
+    const body=listView==="rows"
+      ?`<div class="rows">`+groupByCat(shownList).map(([c,arr])=>catHead(c,arr.length)+arr.map(rowHtml).join("")).join("")+`</div>`
+      :`<div class="tiles">${groupByCat(shownList).flatMap(([c,arr])=>arr).map(tileHtml).join("")}</div>`;
+    v.innerHTML=(qn?allSugg:banner+tools)+viewToggle+body+
+      (qn?"":listView==="rows"?`<p class="hint">סמן מוצר כשקנית אותו, והוא יחזור למלאי · לחיצה על השם לפרטים</p>`:`<p class="hint">לחיצה על מוצר = קניתי, והוא חוזר למלאי · ⋯ לפרטים, כמות ומבצעים</p>`);
+    if($("#share"))$("#share").onclick=shareList;
+    if($("#import"))$("#import").onclick=openImport;
+    if($("#compare"))$("#compare").onclick=openCompare;
+  }
+}
+/* one field per tab: stock = search; list = search + add (Enter or "הוסף") */
+const query={stock:"",list:""};
+function switchTab(t){
+  query[tab]=$("#q").value;tab=t;$("#q").value=query[t];
+  const ph=t==="list"?"חיפוש או הוספה לרשימה":"חיפוש במלאי";
+  $("#q").placeholder=ph;$("#q").setAttribute("aria-label",ph);$("#q").setAttribute("enterkeyhint",t==="list"?"done":"search");
+  render();
+}
+$("#search-wrap").addEventListener("submit",e=>{
+  e.preventDefault();if(tab!=="list")return;
+  const n=$("#q").value.trim();if(!n)return;
+  const ex=byName(n);
+  if(ex&&ex.onList){toast(`${ex.name} כבר ברשימה`)}
+  else if(ex){putItem({...ex,onList:true});toast(`${ex.name} נוסף לרשימה`)}
+  else{putItem({id:newId(),name:n,category:"אחר",qty:0,onList:true,barcodes:[]});toast(`${n} נוסף לרשימה`)}
+  $("#q").value="";render();
+});
+$("#view").addEventListener("click",e=>{
+  const t=e.target.closest("button,[data-buy]");if(!t)return;
+  const d=t.dataset;
+  if(d.inc){const i=items[d.inc];putItem({...i,qty:i.qty+1})}
+  if(d.dec){const i=items[d.dec];if(i.qty<=0)return;const q=i.qty-1;putItem({...i,qty:q,onList:q===0?true:i.onList});if(q===0)toast(`${i.name} עבר לרשימת הקניות`)}
+  if(d.edit) openEdit(items[d.edit]);
+  if(d.view){listView=d.view;try{localStorage.setItem("pantry.listView",listView)}catch(e){}render();return}
+  if(d.addcat){addFromCatalog(d.addcat)}
+  if(d.addlist){const i=items[d.addlist];if(i){putItem({...i,onList:true});toast(`${i.name} נוסף לרשימה`);$("#q").value="";render()}}
+  if(d.binc){const i=items[d.binc];putItem({...i,buyQty:bq(i)+1})}
+  if(d.bdec){const i=items[d.bdec];if(bq(i)>1)putItem({...i,buyQty:bq(i)-1})}
+  if(d.buy){
+    const id=d.buy;bought.add(id);render();
+    setTimeout(()=>{bought.delete(id);const i=items[id];if(i){const prev={...i};const n=bq(i);const {buyQty,...rest}=i;putItem({...rest,qty:Math.max(i.qty,0)+n,onList:false});toastUndo(`${i.name} חזר למלאי${n>1?` (${n})`:""}`,()=>putItem(prev))}},450);
+  }
+});
+$("#view").addEventListener("keydown",e=>{const t=e.target.closest("[data-buy]");if(t&&e.target===t&&(e.key==="Enter"||e.key===" ")){e.preventDefault();t.click()}});
+$("#tab-stock").onclick=()=>switchTab("stock");
+$("#q").addEventListener("input",()=>render());
+$("#q").addEventListener("focus",()=>{if(tab==="list")ensureCatIndex()});
+$("#tab-list").onclick=()=>switchTab("list");
+
+function compareText(){
+  const list=Object.values(items).filter(i=>i.onList);
+  return groupByCat(list).map(([c,a])=>a.map(withQty).join("\n")).join("\n");
+}
+async function copyText(text,ta){
+  try{if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(text);return true}}catch(e){}
+  let tmp=null;
+  try{
+    if(!ta){tmp=ta=document.createElement("textarea");ta.value=text;ta.setAttribute("readonly","");ta.style.cssText="position:fixed;top:0;opacity:0";document.body.appendChild(ta)}
+    ta.focus();ta.select();ta.setSelectionRange(0,text.length);if(document.execCommand&&document.execCommand("copy"))return true;
+  }catch(e){}finally{if(tmp)tmp.remove()}
+  return false;
+}
+/* ---------- basket comparison from the chains' own price + promo files ----------
+   Prices are per branch, one unit of each item. A deal counts only if it applies to a single unit,
+   is open to everyone (no club) and has no purchase condition; multi-buy deals are shown as a hint. */
+let pricesData=null;
+function loadPrices(){return pricesData?Promise.resolve(pricesData):fetch("prices.json").then(r=>r.ok?r.json():null).then(j=>(pricesData=j)).catch(()=>null)}
+function codeFor(i){
+  const c=(i.barcodes||[]).map(x=>String(x).replace(/\D/g,"").replace(/^0+/,"")).find(Boolean);
+  if(c)return c;
+  return nameToCode&&nameToCode.has(i.name)?nameToCode.get(i.name):null;
+}
+function basket(){
+  const list=Object.values(items).filter(i=>i.onList);
+  const chains=pricesData.chains,n=chains.length,t=todayISO();
+  const rows=[],noPrice=[];
+  for(const i of list){
+    const k=codeFor(i),reg=k&&pricesData.prices[k];
+    if(!reg){noPrice.push(i);continue}
+    const d=(deals&&deals.deals[k])||{};
+    const q=bq(i),unit=[],multi=[],line=[];
+    for(let c=0;c<n;c++){
+      let p=reg[c],L=p==null?null:p*q;const x=d[c];
+      if(p!=null&&x&&x[3]>=t){
+        const [mq,tot,,,club,cond]=x;
+        if(!club&&!cond){
+          if(mq===1&&tot<p){p=tot;L=p*q}
+          else if(mq>1){
+            multi[c]=`${mq} ב-${fmtNis(tot)}`;
+            if(q>=mq){const withDeal=Math.floor(q/mq)*tot+(q%mq)*p;if(withDeal<L){L=withDeal;multi[c]+=" ✓"}}
+          }
+        }
+      }
+      unit[c]=p;line[c]=L==null?null:Math.round(L*100)/100;
+    }
+    rows.push({i,q,unit,multi,line});
+  }
+  const common=rows.filter(r=>r.line.every(p=>p!=null));
+  const res=chains.map((name,c)=>({c,name,
+    common:common.reduce((s,r)=>s+r.line[c],0),
+    all:rows.reduce((s,r)=>s+(r.line[c]??0),0),
+    have:rows.filter(r=>r.line[c]!=null).length}));
+  const ranked=[...res].sort((a,b)=>common.length?a.common-b.common:(b.have-a.have)||(a.all-b.all));
+  return {rows,common,noPrice,ranked,chains};
+}
+async function openCompare(){
+  current={compare:true};openSheet();
+  $("#sheet").innerHTML=`<h2>השוואת מחירים</h2><div class="status"><span class="spin"></span><span>מחשב…</span></div>`;
+  loadDeals();
+  await Promise.all([loadPrices(),getCatalog()]);
+  if(!nameToCode){const cat=await getCatalog();if(cat){nameToCode=new Map();for(const k in cat.items)if(!nameToCode.has(cat.items[k][0]))nameToCode.set(cat.items[k][0],k)}}
+  for(let w=0;w<20&&!deals;w++)await new Promise(r=>setTimeout(r,100));
+  if(!current||!current.compare)return;
+  if(!pricesData){$("#sheet").innerHTML=`<h2>השוואת מחירים</h2><p>לא הצלחתי לטעון את קובץ המחירים.</p>`+oshekBlock();bindOshek();return}
+  const B=basket(),top=B.ranked[0],worst=B.ranked[B.ranked.length-1];
+  const nCommon=B.common.length,nRows=B.rows.length;
+  let html=`<h2>השוואת מחירים</h2>${cmpTabs("basket")}<p class="row-sub" style="margin:0 0 12px">מחירים מהסניפים שלך · נכון ל-${fmtDate(pricesData.built)} · לפי הכמויות ברשימה</p>`;
+  if(!nRows){html+=`<div class="empty-state" style="box-shadow:none;background:var(--sunk)"><strong>אין מה להשוות</strong>למוצרים ברשימה אין ברקוד או התאמה לקטלוג.</div>`}
+  else{
+    // comparison 1: the whole basket, each chain with what it has (missing items shown)
+    const full=[...B.ranked].sort((x,y)=>((nRows-x.have)-(nRows-y.have))||(x.all-y.all));
+    html+=`<h3 class="cmp-h">כל הסל <span>${nRows} מוצרים · מה שיש בכל רשת</span></h3><div class="rank">`+full.map((r,idx)=>{
+      const miss=nRows-r.have;
+      return `<div class="rank-row"><span class="pos">${idx+1}</span>
+        <span class="rk-main"><b>${esc(r.name)}</b><small>${miss?`חסרים ${miss} מתוך ${nRows}`:`כל ${nRows} המוצרים`}</small></span>
+        <span class="rk-sum">${fmtNis(r.all)} ₪</span></div>`}).join("")+`</div>
+      <p class="row-sub" style="margin:6px 2px 0">רשת שחסרים בה מוצרים נראית זולה יותר, כי הם לא נספרים בסכום שלה. לכן הסידור הוא קודם לפי מספר החסרים.</p>`;
+    // comparison 2: only the items that every chain sells: an apples-to-apples total, however few they are
+    const commonRank=[...B.ranked].sort((x,y)=>x.common-y.common),ct=commonRank[0],cw=commonRank[commonRank.length-1];
+    html+=`<h3 class="cmp-h">רק מוצרים שיש בכל ${B.chains.length} הרשתות <span>${nCommon} מתוך ${nRows}</span></h3>`;
+    if(!nCommon)html+=`<p class="row-sub" style="margin:0 2px">אין ברשימה מוצר שנמכר בכל ${B.chains.length} הרשתות.</p>`;
+    else html+=`<div class="rank">`+commonRank.map((r,idx)=>`<div class="rank-row ${idx===0?"best":""}"><span class="pos">${idx+1}</span>
+        <span class="rk-main"><b>${esc(r.name)}</b><small>${idx===0?"הזולה ביותר":`יקרה ב-${fmtNis(r.common-ct.common)} ₪`}</small></span>
+        <span class="rk-sum">${fmtNis(r.common)} ₪</span></div>`).join("")+`</div>
+      <p class="row-sub" style="margin:6px 2px 0">${cw.common>ct.common?`<b>הפרש של ${fmtNis(cw.common-ct.common)} ₪</b> בין הזולה ליקרה, על אותם מוצרים בדיוק. `:""}המוצרים: ${B.common.map(r=>esc(r.i.name)+(r.q>1?` ×${r.q}`:"")).join(" · ")}</p>`;
+    // per-item breakdown
+    html+=`<details class="cmp-details"><summary>פירוט לפי מוצר</summary><div class="cmp-table"><table><thead><tr><th>מוצר</th>${B.chains.map(c=>`<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>`+
+      B.rows.map(r=>{const m=Math.min(...r.line.filter(p=>p!=null));
+        return `<tr><td>${esc(r.i.name)}${r.q>1?` <b>×${r.q}</b>`:""}</td>${r.line.map((p,c)=>`<td class="${p===m?"min":""}">${p==null?"—":fmtNis(p)}${r.multi[c]?`<small>${esc(r.multi[c])}</small>`:""}</td>`).join("")}</tr>`}).join("")+
+      `</tbody></table></div><p class="row-sub">המחיר בכל תא הוא לכל הכמות. מודגש: הזול ביותר. מבצע כמות (כמו "2 ב-30") נכלל בסכום כשהכמות שלך מגיעה אליו, ואז מסומן ✓.</p></details>`;
+  }
+  if(B.noPrice.length)html+=`<p class="row-sub" style="margin-top:10px">לא נכללו (אין ברקוד או מחיר): ${B.noPrice.map(i=>esc(i.name)).join(", ")}</p>`;
+  html+=oshekBlock();
+  $("#sheet").innerHTML=html;bindOshek();bindCmpTabs();
+}
+/* ---------- second comparison: chain price index over EVERY product sold in all 4 chains (not your list), one snapshot per data update ---------- */
+const cmpTabs=active=>`<div class="view-toggle cmp-tabs" role="tablist"><button data-cmp="basket" aria-pressed="${active==="basket"}">הסל שלי</button><button data-cmp="index" aria-pressed="${active==="index"}">מדד הרשתות</button></div>`;
+function bindCmpTabs(){$("#sheet").querySelectorAll("[data-cmp]").forEach(b=>b.onclick=()=>{if(b.dataset.cmp==="index")openIndex();else openCompare()})}
+let indexData=null;
+async function openIndex(){
+  current={compare:true};
+  $("#sheet").innerHTML=`<h2>השוואת מחירים</h2>${cmpTabs("index")}<div class="status"><span class="spin"></span><span>טוען…</span></div>`;bindCmpTabs();
+  if(!indexData)indexData=await fetch("index_history.json").then(r=>r.ok?r.json():null).catch(()=>null);
+  if(!current||!current.compare)return;
+  if(!indexData||!indexData.snapshots.length){$("#sheet").innerHTML=`<h2>השוואת מחירים</h2>${cmpTabs("index")}<p>אין עדיין נתוני מדד.</p>`+oshekBlock();bindOshek();bindCmpTabs();return}
+  const S=indexData.snapshots,last=S[S.length-1],ch=indexData.chains;
+  const order=ch.map((name,c)=>({name,c,sum:last.sum[c],above:last.avgAbove[c],cheap:last.cheapest[c]})).sort((a,b)=>a.sum-b.sum);
+  const best=order[0];
+  let html=`<h2>השוואת מחירים</h2>${cmpTabs("index")}
+    <p class="row-sub" style="margin:0 0 12px">כל ${last.items.toLocaleString("he-IL")} המוצרים שנמכרים בכל ${ch.length} הרשתות, לא רק הרשימה שלך · מחיר מדף רגיל, בלי מבצעים · נכון ל-${fmtDate(last.date)}</p>
+    <div class="rank">${order.map((r,i)=>`<div class="rank-row ${i===0?"best":""}"><span class="pos">${i+1}</span>
+      <span class="rk-main"><b>${esc(r.name)}</b><small>${i===0?"הזולה ביותר":`יקרה ב-${((r.sum/best.sum-1)*100).toFixed(1)}% (${Math.round(r.sum-best.sum).toLocaleString("he-IL")} ₪)`} · הכי זולה ב-${r.cheap.toLocaleString("he-IL")} מוצרים</small></span>
+      <span class="rk-sum">${Math.round(r.sum).toLocaleString("he-IL")} ₪</span></div>`).join("")}</div>
+    <p class="row-sub" style="margin:8px 2px 0">הסכום: יחידה אחת מכל אחד מהמוצרים. "הכי זולה ב-" סופר את המוצרים שבהם הרשת במחיר הנמוך ביותר, כולל תיקו.</p>`;
+  html+=`<h3 class="cat" style="padding:16px 2px 6px">לאורך זמן · בכמה אחוז כל רשת יקרה מהזולה</h3>`;
+  if(S.length<2)html+=`<p class="row-sub" style="margin:0 2px">יש עדיין עדכון אחד (${fmtDate(last.date)}). כל עדכון שבועי של הקבצים יוסיף כאן שורה, ואחרי כמה שבועות יראו מגמה.</p>`;
+  html+=`<div class="cmp-table"><table><thead><tr><th>תאריך</th>${ch.map(n=>`<th>${esc(n)}</th>`).join("")}</tr></thead><tbody>${[...S].reverse().map(sn=>{const m=Math.min(...sn.sum);return `<tr><td>${fmtDate(sn.date)}</td>${sn.sum.map(v=>`<td class="${v===m?"min":""}">${v===m?"הזולה":`<span dir="ltr">+${((v/m-1)*100).toFixed(1)}%</span>`}</td>`).join("")}</tr>`}).join("")}</tbody></table></div>`;
+  html+=oshekBlock();
+  $("#sheet").innerHTML=html;bindOshek();bindCmpTabs();
+}
+function oshekBlock(){return `<div class="actions"><button class="btn" id="cancel">סגירה</button></div>`}
+function bindOshek(){$("#cancel").onclick=closeSheet}
+
+
+
+/* ---------- import a list pasted from WhatsApp / email / notes: one product per line, quantity 1 ---------- */
+function parseImport(text){
+  const out=[],seen=new Set();
+  // strip chat prefixes per line first ("[16/10, 07:30] Name:" / "16.10.2026, 07:15 - Name:"), then split on commas
+  const lines=String(text||"").replace(/\r/g,"").split("\n")
+    .map(l=>l.replace(/^\s*\[[^\]]{3,40}\]\s*[^:]{1,40}:\s*/,"").replace(/^\s*\d{1,2}[./]\d{1,2}[./]\d{2,4},?\s*\d{1,2}:\d{2}(?::\d{2})?\s*-\s*[^:]{1,40}:\s*/,""))
+    .flatMap(l=>l.split(/[,;،]|\s•\s/));
+  for(let l of lines){
+    l=l.replace(/^(?:\s*(?:-\s*)?[\[(]\s*[xXvV✓✔✗✘]?\s*[\])])+/u,"")        // checkbox brackets: "[ ]", "[  ]", "[x]", "( )", "- [ ]"
+       .replace(/^[^\p{L}\p{N}]+/u,"")                                     // leading bullets, emoji, dashes, ☐ ✅
+       .replace(/^\d{1,3}\s*(?:[.)]|\s-)?\s*(?=\p{L})/u,"")                // numbering or a quantity before the name: "1." "2)" "3 -" "2 חלב" (quantity is always 1)
+       .replace(/[^\p{L}\p{N}%'"׳״)]+$/u,"")                               // trailing symbols
+       .replace(/[*_~]/g,"")                                              // WhatsApp bold/italic marks
+       .replace(/\s*[×x]\s*\d+\s*$/i,"")                                 // trailing ×2 (quantity is 1 here)
+       .replace(/\s+/g," ").trim();
+    if(!l||l.length<2||l.length>60)continue;
+    if(/^(רשימת קניות|רשימה|קניות|shopping list)\s*:?$/i.test(l)||/:$/.test(l)||/^🛒/.test(l))continue;  // titles / headings
+    if(CATS.includes(l))continue;                                         // our own category headings
+    const k=norm(l);if(seen.has(k))continue;seen.add(k);out.push(l);
+  }
+  return out;
+}
+function bestMatch(line){
+  const n=norm(line);
+  const ex=Object.values(items).find(i=>norm(i.name)===n);
+  const opts=[];
+  if(ex)opts.push({kind:"item",id:ex.id,label:`${ex.name} (כבר אצלך)`});
+  const have=new Set(opts.map(o=>o.id));
+  const sug=catalogOptions(line);
+  // a one-word line ("עגבניות", "שמפו") is too vague to pick a product for you: keep it as written, offer the catalog in the list
+  const specific=line.trim().split(/\s+/).length>=3||/\d/.test(line);   // "שמן זית" is still generic; "חלב 3%" or "קוטג' טרה 5" is not
+  const cnt={};sug.forEach(c=>cnt[c.cat]=(cnt[c.cat]||0)+1);
+  const PRODUCE=/^(עגבני|מלפפונ|בצל|שום|תפוח|בננ|תפוז|לימונ|אבוקדו|גזר|חסה|כרוב|קישוא|חציל|פלפל|תות|ענב|אגס|אפרסק|מנגו|אבטיח|מלון|פטרוזיליה|כוסברה|שמיר|נענע|סלק|בטטה|תפו"א|תפוחי אדמה|פטריות|ירקות|פירות)/;
+  const guessCat=PRODUCE.test(line.trim())?"ירקות ופירות":(Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a])[0]||"אחר");
+  const textOpt={kind:"text",cat:guessCat,label:`"${line}" כפי שנכתב (בלי ברקוד)`};
+  const catOpts=sug.map(c=>({kind:"cat",k:c.k,label:`${c.name}${c.info?` · ${c.info}`:""}`}));
+  if(ex)opts.push(...catOpts,textOpt);
+  else if(specific)opts.push(...catOpts,textOpt);
+  else opts.push(textOpt,...catOpts);
+  return opts;
+}
+let importRows=[];
+function openImport(){
+  current={importing:true};openSheet();
+  $("#sheet").innerHTML=`<h2>ייבוא רשימה</h2>
+    <p class="row-sub" style="margin:-4px 0 10px">הדבק את הרשימה כמו שקיבלת אותה: כל מוצר בשורה, או מופרדים בפסיקים. כל מוצר ייכנס בכמות 1.</p>
+    <textarea class="field" id="imp-text" rows="8" placeholder="חלב&#10;ביצים&#10;לחם אחיד&#10;עגבניות" style="resize:vertical"></textarea>
+    <div class="two" style="margin-top:10px"><button class="btn" id="imp-paste">📋 הדבק מהלוח</button><label class="btn" style="text-align:center;cursor:pointer">📄 מקובץ טקסט<input type="file" id="imp-file" accept=".txt,text/plain" hidden></label></div>
+    <div class="actions"><button class="btn stock" id="imp-go">המשך</button><button class="btn" id="cancel">ביטול</button></div>`;
+  $("#cancel").onclick=closeSheet;
+  $("#imp-paste").onclick=async()=>{try{const t=await navigator.clipboard.readText();if(t){$("#imp-text").value=t;return}}catch(e){}toast("אין גישה ללוח. לחץ לחיצה ארוכה בתיבה ובחר 'הדבק'");$("#imp-text").focus()};
+  $("#imp-file").onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;f.text().then(t=>{$("#imp-text").value=t})};
+  $("#imp-go").onclick=async()=>{
+    const lines=parseImport($("#imp-text").value);
+    if(!lines.length){toast("לא מצאתי מוצרים בטקסט");return}
+    $("#sheet").innerHTML=`<h2>ייבוא רשימה</h2><div class="status"><span class="spin"></span><span>מתאים ${lines.length} מוצרים לקטלוג…</span></div>`;
+    await loadCatIndex();
+    if(!current||!current.importing)return;
+    importRows=lines.map(l=>({line:l,opts:bestMatch(l),pick:0,on:true}));
+    renderImportReview();
+  };
+}
+function renderImportReview(){
+  const n=importRows.filter(r=>r.on).length;
+  $("#sheet").innerHTML=`<h2>בדיקה לפני הוספה</h2>
+    <p class="row-sub" style="margin:-4px 0 10px">שורות מפורטות (כמו "חלב 3%") קיבלו מוצר מהקטלוג, עם ברקוד, מבצעים והשוואת מחירים. שורות כלליות (כמו "ביצים" או "שמן זית") נשארו כפי שנכתבו, ואפשר לבחור להן מוצר מדויק מהתפריט. בתפריט מופיעים רק מוצרים שנמכרים לפחות ב-3 רשתות.</p>
+    <div class="imp-list">${importRows.map((r,i)=>`
+      <div class="imp-row ${r.on?"":"off"}">
+        <label class="imp-on"><input type="checkbox" data-imp-on="${i}" ${r.on?"checked":""}><span class="imp-line">${esc(r.line)}</span></label>
+        <select data-imp-pick="${i}" ${r.on?"":"disabled"}>${r.opts.map((o,j)=>`<option value="${j}" ${j===r.pick?"selected":""}>${esc(o.label)}</option>`).join("")}</select>
+      </div>`).join("")}</div>
+    <div class="actions"><button class="btn stock" id="imp-add">הוסף ${n} מוצרים לרשימה</button><button class="btn" id="imp-back">חזרה לטקסט</button><button class="btn" id="cancel">ביטול</button></div>`;
+  $("#cancel").onclick=closeSheet;
+  $("#imp-back").onclick=openImport;
+  $("#sheet").querySelectorAll("[data-imp-on]").forEach(el=>el.onchange=()=>{importRows[+el.dataset.impOn].on=el.checked;renderImportReview()});
+  $("#sheet").querySelectorAll("[data-imp-pick]").forEach(el=>el.onchange=()=>{importRows[+el.dataset.impPick].pick=+el.value});
+  $("#imp-add").onclick=commitImport;
+}
+function commitImport(){
+  let added=0,already=0;
+  for(const r of importRows){
+    if(!r.on)continue;const o=r.opts[r.pick];
+    if(o.kind==="item"){const i=items[o.id];if(!i)continue;if(i.onList)already++;else{putItem({...i,onList:true});added++}}
+    else if(o.kind==="cat"){const c=catIndex.find(x=>x.k===o.k);if(!c)continue;
+      const ex=Object.values(items).find(i=>(i.barcodes||[]).some(b=>String(b).replace(/^0+/,"")===c.k));
+      if(ex){if(ex.onList)already++;else{putItem({...ex,onList:true});added++}}
+      else{putItem({id:newId(),name:c.name,category:c.cat,qty:0,onList:true,barcodes:[c.k]});added++}}
+    else{const ex=byName(r.line);if(ex){if(ex.onList)already++;else{putItem({...ex,onList:true});added++}}
+      else{putItem({id:newId(),name:r.line,category:o.cat||"אחר",qty:0,onList:true,barcodes:[]});added++}}
+  }
+  closeSheet();switchTab("list");
+  toast(`נוספו ${added} מוצרים לרשימה${already?` · ${already} כבר היו בה`:""}`);
+}
+
+/* ---------- price check: look up any product in the 4 chains' files, see shelf price + deals per chain ---------- */
+const SYN=[[/טיטולים|טיטול/g,"חיתול"],[/חיתולים/g,"חיתול"],[/מס'|מס/g,"מידה"]];
+const canon=s=>{let t=norm(s);for(const [re,to] of SYN)t=t.replace(re,to);return t};
+function priceSearch(raw){
+  if(!catIndex)return null;
+  const toks=canon(raw).split(" ").filter(Boolean);if(!toks.length||canon(raw).length<2)return [];
+  const P=pricesData&&pricesData.prices;
+  // forgiving: start strict, and when almost nothing matches let one more word be missing (chain names are often cut short)
+  let need=toks.length>=3?toks.length-1:toks.length;
+  let hits=[];
+  for(;;){hits=[];
+  for(const c of catIndex){
+    if(!c.cn)c.cn=" "+canon(c.name)+" ";
+    let m=0;
+    for(const t of toks){
+      // numbers must match as whole numbers ("3" ≠ "36"); words match as a word start ("חיתול" ⊂ "חיתולים")
+      const ok=/^\d+$/.test(t)?new RegExp(`(^|[^\\d])${t}([^\\d]|$)`).test(c.cn):c.cn.includes(" "+t);
+      if(ok)m++;
+    }
+    if(m<need)continue;
+    const pr=P&&P[c.k]?P[c.k]:[];
+    hits.push({...c,m,pr,nCh:pr.filter(x=>x!=null).length});
+  }
+  if(hits.length>=3||need<=Math.max(1,Math.ceil(toks.length/2)))break;need--;}
+  hits.sort((a,b)=>(b.m-a.m)||(b.nCh-a.nCh)||(a.name.length-b.name.length));
+  return hits.slice(0,20);
+}
+function priceCard(h){
+  const chains=(pricesData&&pricesData.chains)||[];
+  const d=(deals&&deals.deals[h.k])||{},t=todayISO();
+  const rows=chains.map((name,c)=>{
+    const reg=h.pr[c];const x=d[c]&&d[c][3]>=t?d[c]:null;
+    let eff=reg;if(x&&x[0]===1&&!x[4]&&!x[5]&&reg!=null&&x[1]<reg)eff=x[1];
+    return {name,reg,x,eff};
+  });
+  const avail=rows.filter(r=>r.eff!=null),min=avail.length?Math.min(...avail.map(r=>r.eff)):null;
+  return `<div class="pc">
+    <div class="pc-head"><span class="pc-em" aria-hidden="true">${CAT_ICON[h.cat]||"🛒"}</span><b class="pc-name">${esc(h.name)}</b><button class="add-btn" data-addcat="${h.k}">+ לרשימה</button></div>
+    <div class="pc-rows">${rows.map(r=>`<div class="pc-row ${r.eff!=null&&r.eff===min?"min":""} ${r.reg==null?"na":""}">
+      <span class="pc-chain">${esc(r.name)}</span>
+      <span class="pc-price">${r.reg==null?"לא נמכר":r.x&&r.eff<r.reg?`<b>${fmtNis(r.eff)} ₪</b> <s>${fmtNis(r.reg)}</s>`:`${fmtNis(r.reg)} ₪`}</span>
+      ${r.x?`<span class="pc-deal">🏷️ ${r.x[0]>1?`${r.x[0]} ב־${fmtNis(r.x[1])} ₪`:`${fmtNis(r.x[1])} ₪`} · עד ${fmtDate(r.x[3])}${r.x[4]?" · מועדון":""}${r.x[5]?" · בתנאי":""}</span>`:""}
+    </div>`).join("")}</div></div>`;
+}
+async function openPriceCheck(){
+  current={pricecheck:true};openSheet();
+  $("#sheet").innerHTML=`<h2>בדיקת מחיר ומבצעים</h2>
+    <p class="row-sub" style="margin:-4px 0 10px">חיפוש בכל המוצרים של 5 הסניפים שלך. אפשר לכתוב מותג, סוג ומידה, למשל "האגיס פרידום מידה 3".</p>
+    <form class="search" id="pc-form" style="margin-bottom:10px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="pc-q" type="search" placeholder="מה מחפשים?" autocomplete="off" enterkeyhint="search"></form>
+    <div id="pc-res" class="pc-res"><div class="status"><span class="spin"></span><span>טוען את קבצי הרשתות…</span></div></div>
+    <div class="actions"><button class="btn" id="cancel">סגירה</button></div>`;
+  $("#cancel").onclick=closeSheet;
+  $("#pc-form").onsubmit=e=>{e.preventDefault();$("#pc-q").blur()};
+  loadDeals();await loadCatIndex();for(let w=0;w<20&&!deals;w++)await new Promise(r=>setTimeout(r,100));
+  if(!current||!current.pricecheck)return;
+  const meta=`<p class="row-sub" style="margin:0 2px">מחירים ומבצעים נכון ל-${fmtDate((pricesData&&pricesData.built)||"")}.</p>`;
+  const draw=()=>{const q=$("#pc-q").value.trim();const res=$("#pc-res");if(!res)return;
+    if(q.length<2){res.innerHTML=meta;return}
+    const hits=priceSearch(q)||[];
+    res.innerHTML=hits.length?hits.map(priceCard).join("")+meta:`<div class="empty-state" style="box-shadow:none;background:var(--sunk)"><strong>לא נמצא</strong>נסה פחות מילים, או מילה אחרת (למשל "חיתול" במקום שם הדגם).</div>`;
+  };
+  let tmr;$("#pc-q").oninput=()=>{clearTimeout(tmr);tmr=setTimeout(draw,150)};
+  $("#pc-res").onclick=e=>{const b=e.target.closest("[data-addcat]");if(b){addFromCatalog(b.dataset.addcat);b.textContent="✓ ברשימה";b.disabled=true}};
+  draw();$("#pc-q").focus();
+}
+
+/* share: scripted popups/navigator.share are often blocked inside the artifact frame,
+   so every target is a real link the user taps (same approach as the price-compare button) */
+function shareText(){
+  const list=Object.values(items).filter(i=>i.onList);
+  return "🛒 רשימת קניות\n\n"+groupByCat(list).map(([c,a])=>`*${c}*\n`+a.map(i=>"• "+i.name+(bq(i)>1?` ×${bq(i)}`:"")).join("\n")).join("\n\n");
+}
+function shareList(){
+  const text=shareText(),enc=encodeURIComponent(text);
+  current={share:true};openSheet();
+  const link=(href,label,cls="")=>`<a class="btn ${cls}" href="${href}" target="_blank" rel="noopener" style="text-align:center;text-decoration:none">${label}</a>`;
+  $("#sheet").innerHTML=`<h2>שליחת הרשימה</h2>
+    <textarea class="field" id="sh-text" rows="7" readonly style="resize:vertical">${esc(text)}</textarea>
+    <div class="actions">
+      ${link("https://wa.me/?text="+enc,"וואטסאפ","stock")}
+      <div class="two">
+        ${link("https://t.me/share/url?url="+encodeURIComponent(" ")+"&text="+enc,"טלגרם")}
+        ${link("sms:?&body="+enc,"הודעת SMS")}
+      </div>
+      <div class="two">
+        ${link("mailto:?subject="+encodeURIComponent("רשימת קניות")+"&body="+enc,"אימייל")}
+        <button class="btn" id="sh-copy">העתקה</button>
+      </div>
+      ${navigator.share?`<button class="btn" id="sh-native">אפליקציה אחרת…</button>`:""}
+      <button class="btn" id="cancel">סגירה</button>
+    </div>`;
+  const ta=$("#sh-text");
+  $("#cancel").onclick=closeSheet;
+  $("#sh-copy").onclick=async()=>toast(await copyText(text,ta)?"הרשימה הועתקה":"סמן את הטקסט והעתק ידנית");
+  const nat=$("#sh-native");
+  if(nat)nat.onclick=async()=>{try{await navigator.share({text})}catch(e){if(e.name!=="AbortError")toast("השיתוף נחסם כאן. השתמש בוואטסאפ או בהעתקה")}};
+}
+
+/* ---------- sheet ---------- */
+let current=null;
+function openSheet(){$("#backdrop").hidden=false}
+function closeSheet(){$("#backdrop").hidden=true;current=null;$("#sheet").innerHTML=""}
+$("#backdrop").addEventListener("click",e=>{if(e.target.id==="backdrop")closeSheet()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#backdrop").hidden)closeSheet()});
+
+/* the dock labels open the file inputs natively (no scripted .click(), which mobile webviews often block) */
+[["add","#cam-add","#btn-add"],["out","#cam-out","#btn-out"]].forEach(([mode,inSel,btnSel])=>{
+  const inp=$(inSel),btn=$(btnSel);
+  inp.onchange=()=>{const f=inp.files&&inp.files[0];if(f)handlePhoto(f,mode);inp.value=""};
+  btn.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();inp.click()}});
+});
+
+async function handlePhoto(file,mode){
+  const ctx={mode,busy:true,status:"מחפש ברקוד…",name:"",category:"אחר",barcode:null,matchId:"",thumb:null,photo:null,qty:1};
+  current=ctx;openSheet();renderFlow();
+  let img;
+  try{img=await prepImage(file)}catch(e){ctx.busy=false;ctx.status="לא הצלחתי לפתוח את התמונה. נסה לצלם שוב.";return renderFlow()}
+  ctx.thumb=img.thumb;ctx.photo=img.url;renderFlow();
+  const code=await readBarcode(file);
+  if(current!==ctx)return;
+  if(code){
+    ctx.barcode=code;const hit=byBarcode(code);
+    if(hit){ctx.matchId=hit.id;ctx.busy=false;ctx.status="זוהה לפי ברקוד";return renderFlow()}
+    const known=await catalogLookup(code);
+    if(current!==ctx)return;
+    if(known){
+      ctx.name=known.name;ctx.category=known.category;ctx.busy=false;
+      const same=byName(known.name);if(same)ctx.matchId=same.id;
+      ctx.status="זוהה מקטלוג המוצרים לפי ברקוד";return renderFlow();
+    }
+  }
+  ctx.status=code?"ברקוד חדש. מזהה את המוצר מהתמונה…":"מזהה את המוצר מהתמונה…";renderFlow();
+  const ai=await identify(img.blob);
+  if(current!==ctx)return;
+  ctx.busy=false;
+  if(ai.error){
+    ctx.status=ai.error==="not_granted"||ai.error==="unavailable"?"זיהוי מתמונה לא זמין. הקלד את שם המוצר.":ai.error==="rate_limited"?"יותר מדי זיהויים ברצף. הקלד את השם או נסה שוב בעוד דקה.":"לא הצלחתי לזהות. הקלד את שם המוצר.";
+    return renderFlow();
+  }
+  ctx.name=ai.name||"";if(CATS.includes(ai.category))ctx.category=ai.category;
+  if(!ctx.barcode&&ai.barcode&&/^\d{6,14}$/.test(String(ai.barcode))){
+    ctx.barcode=String(ai.barcode);const hit=byBarcode(ctx.barcode);if(hit)ctx.matchId=hit.id;
+    const known=await catalogLookup(ctx.barcode);if(current!==ctx)return;
+    if(known){ctx.name=known.name;ctx.category=known.category}
+  }
+  if(!ctx.matchId&&ai.matchId&&items[ai.matchId])ctx.matchId=ai.matchId;
+  if(!ctx.matchId&&ctx.name){const hit=byName(ctx.name);if(hit)ctx.matchId=hit.id}
+  ctx.status=ctx.name?"בדוק שהשם נכון לפני שממשיכים":"לא זיהיתי את המוצר. הקלד את שמו.";
+  renderFlow();
+}
+
+function matchSelect(ctx){
+  const opts=Object.values(items).sort((a,b)=>a.name.localeCompare(b.name,"he"));
+  return `<label for="f-match">${ctx.mode==="add"?"מוצר שכבר במלאי?":"איזה מוצר נגמר?"}</label>
+  <select id="f-match"><option value="">${ctx.mode==="add"?"לא, מוצר חדש":"מוצר שלא במלאי"}</option>${opts.map(i=>`<option value="${i.id}" ${i.id===ctx.matchId?"selected":""}>${esc(i.name)}</option>`).join("")}</select>`;
+}
+function newFields(ctx){
+  return `<label for="f-name">שם המוצר</label><input class="field" id="f-name" value="${esc(ctx.name)}" placeholder="למשל: קוטג' 5%" autocomplete="off">
+  <label for="f-cat">קטגוריה</label><select id="f-cat">${CATS.map(c=>`<option ${c===ctx.category?"selected":""}>${c}</option>`).join("")}</select>`;
+}
+function renderFlow(){
+  const ctx=current;if(!ctx)return;
+  const m=ctx.matchId&&items[ctx.matchId];
+  const head=ctx.mode==="add"?"הוספה למלאי":"נגמר לי";
+  let body=`<h2>${head}</h2>`;
+  if(ctx.photo) body+=`<img class="photo" src="${ctx.photo}" alt="המוצר שצילמת">`;
+  body+=`<div class="status" role="status">${ctx.busy?'<span class="spin" aria-hidden="true"></span>':""}<span>${esc(ctx.status)}</span></div>`;
+  if(!ctx.busy){
+    if(Object.keys(items).length) body+=matchSelect(ctx);
+    if(m){
+      body+=`<div class="match">${thumbHtml(m)}<div><div class="row-name">${esc(m.name)}</div><div class="row-sub">יש בבית: ${m.qty}${m.onList?", כבר ברשימת הקניות":""}</div></div></div>`;
+    }else body+=newFields(ctx);
+    if(ctx.mode==="add") body+=`<label for="f-qty">כמה יחידות?</label><input class="field" id="f-qty" type="number" inputmode="numeric" min="1" value="${ctx.qty}">`;
+    if(ctx.barcode) body+=`<p class="row-sub">ברקוד: <span class="code">${esc(ctx.barcode)}</span></p>`;
+    body+=`<div class="actions">`;
+    if(ctx.mode==="add") body+=`<button class="btn stock" id="go">${m?"הוסף יחידות למלאי":"הוסף למלאי"}</button>`;
+    else if(m&&m.qty>1) body+=`<button class="btn out" id="go">נגמר, העבר לרשימת הקניות</button><button class="btn" id="go-one">נגמרה רק יחידה אחת (נשארו ${m.qty-1})</button>`;
+    else body+=`<button class="btn out" id="go">העבר לרשימת הקניות</button>`;
+    body+=`<button class="btn" id="cancel">ביטול</button></div>`;
+  }else body+=`<div class="actions"><button class="btn" id="cancel">ביטול</button></div>`;
+  $("#sheet").innerHTML=body;
+  $("#cancel").onclick=closeSheet;
+  if(ctx.busy)return;
+  const sel=$("#f-match");if(sel)sel.onchange=()=>{keepInputs(ctx);ctx.matchId=sel.value;renderFlow()};
+  $("#go").onclick=()=>commit(false);
+  const one=$("#go-one");if(one)one.onclick=()=>commit(true);
+}
+function keepInputs(ctx){
+  const n=$("#f-name"),c=$("#f-cat"),q=$("#f-qty");
+  if(n)ctx.name=n.value;if(c)ctx.category=c.value;if(q)ctx.qty=Math.max(1,parseInt(q.value)||1);
+}
+function commit(justOne){
+  const ctx=current;keepInputs(ctx);
+  const m=ctx.matchId&&items[ctx.matchId];
+  const photo=ctx.barcode?null:ctx.thumb;   // barcode scans: keep the category icon, not a picture of the barcode
+  const addCode=it=>{const b=new Set(it.barcodes||[]);if(ctx.barcode)b.add(ctx.barcode);return [...b]};
+  if(!m&&!ctx.name.trim()){$("#f-name").focus();toast("צריך שם למוצר");return}
+  if(ctx.mode==="add"){
+    if(m){putItem({...m,qty:Math.max(m.qty,0)+ctx.qty,onList:false,barcodes:addCode(m),thumb:ctx.barcode?null:(m.thumb||photo)});toast(`נוסף: ${m.name}`)}
+    else{putItem({id:newId(),name:ctx.name.trim(),category:ctx.category,qty:ctx.qty,onList:false,barcodes:addCode({}),thumb:photo});toast(`נוסף למלאי: ${ctx.name.trim()}`)}
+  }else{
+    if(m&&justOne){putItem({...m,qty:m.qty-1,barcodes:addCode(m)});toast(`נשארו ${m.qty-1} ${m.name}`)}
+    else if(m){putItem({...m,qty:0,onList:true,barcodes:addCode(m),thumb:ctx.barcode?null:(m.thumb||photo)});toast(`${m.name} ברשימת הקניות`)}
+    else{putItem({id:newId(),name:ctx.name.trim(),category:ctx.category,qty:0,onList:true,barcodes:addCode({}),thumb:photo});toast(`${ctx.name.trim()} ברשימת הקניות`)}
+  }
+  closeSheet();
+}
+
+function openEdit(it){
+  current={edit:true};openSheet();
+  /* product picture: the app only has the photo you took (often of the barcode), so open an image search instead.
+     A real link (not window.open) so the artifact frame doesn't block it. */
+  const code=(it.barcodes||[])[0];
+  const imgQ=code?code:it.name;
+  const imgLink=`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(imgQ)}`;
+  const nameLink=`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(it.name)}`;
+  const linkBtn=(href,label,cls="")=>`<a class="btn ${cls}" href="${href}" target="_blank" rel="noopener" style="text-align:center;text-decoration:none">${label}</a>`;
+  const pics=`<label>תמונת המוצר</label>`+(code?`<div class="two">${linkBtn(imgLink,"🖼️ לפי ברקוד")}${linkBtn(nameLink,"🔎 לפי שם")}</div>`:`<div>${linkBtn(nameLink,"🖼️ חיפוש תמונה")}</div>`);
+  $("#sheet").innerHTML=`<h2>עריכת מוצר</h2>
+    ${pics}
+    <label for="e-name">שם המוצר</label><input class="field" id="e-name" value="${esc(it.name)}">
+    <label for="e-cat">קטגוריה</label><select id="e-cat">${CATS.map(c=>`<option ${c===it.category?"selected":""}>${c}</option>`).join("")}</select>
+    ${it.onList?`<label>כמה לקנות</label><div class="stepper buy big"><button type="button" id="e-bdec" aria-label="פחות">−</button><output id="e-bq">${bq(it)}</output><button type="button" id="e-binc" aria-label="עוד">+</button></div>`:""}
+    ${it.onList&&dealsFor(it).length?`<label>מבצעים</label><div class="deals-box">${dealsFor(it).map(dealHtml).join("")}</div>`:""}
+    <label for="e-qty">כמות בבית</label><input class="field" id="e-qty" type="number" inputmode="numeric" min="0" value="${it.qty}">
+    ${(it.barcodes||[]).length?`<p class="row-sub">ברקודים שמורים: <span class="code">${it.barcodes.map(esc).join(", ")}</span></p>`:""}
+    <div class="actions">
+      <button class="btn primary" id="e-save">שמירה</button>
+      <button class="btn" id="e-list">${it.onList?"הסר מרשימת הקניות":"הוסף לרשימת הקניות"}</button>
+      <div class="two"><button class="btn danger" id="e-del">מחיקת המוצר</button><button class="btn" id="cancel">ביטול</button></div>
+    </div>`;
+  $("#cancel").onclick=closeSheet;
+  let ebq=bq(it);
+  if($("#e-binc")){$("#e-binc").onclick=()=>{ebq++;$("#e-bq").textContent=ebq};$("#e-bdec").onclick=()=>{if(ebq>1)ebq--;$("#e-bq").textContent=ebq}}
+  const read=()=>({...it,name:$("#e-name").value.trim()||it.name,category:$("#e-cat").value,qty:Math.max(0,parseInt($("#e-qty").value)||0),...(it.onList?{buyQty:ebq}:{})});
+  $("#e-save").onclick=()=>{putItem(read());closeSheet()};
+  $("#e-list").onclick=()=>{putItem({...read(),onList:!it.onList});closeSheet()};
+  /* confirm() is silently blocked inside the artifact frame, so confirm with a second tap instead */
+  let armed=false,armT;
+  $("#e-del").onclick=()=>{
+    const b=$("#e-del");
+    if(!armed){armed=true;b.textContent="לחץ שוב למחיקה";b.classList.add("out");b.classList.remove("danger");
+      armT=setTimeout(()=>{armed=false;if(b.isConnected){b.textContent="מחיקת המוצר";b.classList.remove("out");b.classList.add("danger")}},4000);return}
+    clearTimeout(armT);const name=it.name;removeItem(it.id);closeSheet();toast(`${name} נמחק`);
+  };
+}
+
+let tt;
+function toastUndo(msg,undo){const t=$("#toast");t.textContent=msg;const b=document.createElement("button");b.className="undo";b.textContent="ביטול";b.onclick=()=>{t.hidden=true;undo()};t.appendChild(b);t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,4000)}
+/* ---------- Android back button: close the open sheet / go back to the pantry tab instead of leaving the app ----------
+   One "guard" entry is kept in history; each Back press lands on popstate, we undo one step and put the guard back.
+   Chrome ignores history entries pushed without a user tap, so the guard is (re)armed on the next tap as well. */
+let guarded=false,exitArmed=false,exitTimer=null;
+function armBack(){if(guarded)return;try{history.pushState({pantry:1},"");guarded=true}catch(e){}}
+window.addEventListener("pointerdown",armBack,{capture:true,passive:true});
+window.addEventListener("popstate",()=>{
+  guarded=false;
+  if(!$("#backdrop").hidden){closeSheet();armBack();return}
+  if(tab!=="stock"){switchTab("stock");armBack();return}
+  if(exitArmed)return;
+  exitArmed=true;toast("לחיצה נוספת על חזור תצא מהאפליקציה");
+  clearTimeout(exitTimer);exitTimer=setTimeout(()=>{exitArmed=false;armBack()},2500);
+});
+function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,2400)}
+
+/* theme: auto (follows the phone) -> light -> dark; remembered per device */
+const THEMES=[["auto","🌗"],["light","☀️"],["dark","🌙"]];
+let theme="auto";try{theme=localStorage.getItem("pantry.theme")||"auto"}catch(e){}
+function applyTheme(){
+  if(theme==="auto")document.documentElement.removeAttribute("data-theme");else document.documentElement.setAttribute("data-theme",theme);
+  const t=THEMES.find(x=>x[0]===theme)||THEMES[0];
+  $("#theme-btn").textContent=t[1];$("#theme-btn").setAttribute("aria-label","מצב תצוגה: "+({auto:"אוטומטי",light:"בהיר",dark:"כהה"})[theme]+". לחץ להחלפה");
+}
+$("#price-btn").onclick=openPriceCheck;
+$("#theme-btn").onclick=()=>{const i=THEMES.findIndex(x=>x[0]===theme);theme=THEMES[(i+1)%THEMES.length][0];try{localStorage.setItem("pantry.theme",theme)}catch(e){}applyTheme()};
+applyTheme();
+
+/* ---------- household link (#h=...) and one-time import (#import=...) ---------- */
+function b64dec(t){t=t.replace(/-/g,"+").replace(/_/g,"/");while(t.length%4)t+="=";return new TextDecoder().decode(Uint8Array.from(atob(t),c=>c.charCodeAt(0)))}
+function handleHash(){
+  const h=location.hash.slice(1);if(!h)return null;
+  const P=new URLSearchParams(h);let msg=null;
+  const hid=P.get("h");
+  if(hid&&/^h[a-z0-9]{20,40}$/.test(hid)&&hid!==getHousehold()){
+    setHousehold(hid);items={};pending={};saveLocal();savePending();msg="הצטרפת לרשימה המשותפת";
+  }
+  const imp=P.get("import");
+  if(imp){
+    try{const arr=JSON.parse(b64dec(imp));let n=0;
+      for(const it of arr){if(!it||!it.id||!it.name||items[it.id])continue;items[it.id]=it;queue(it.id,{op:"set",item:it});n++}
+      saveLocal();msg=`יובאו ${n} מוצרים מהגרסה הקודמת`;
+    }catch(e){msg="קישור הייבוא לא תקין"}
+  }
+  try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}
+  return msg;
+}
+function openSync(){
+  current={sync:true};openSheet();
+  const url=shareUrl(),st={live:"✓ מסונכרן",connecting:"מתחבר…",error:"לא מחובר",off:"לא מחובר"}[syncState];
+  $("#sheet").innerHTML=`<h2>סנכרון ושיתוף</h2>
+    <p class="row-sub" style="margin:0 0 12px">מצב: <b>${st}</b>${syncState==="error"?` <span dir="ltr">(${esc(syncError)})</span>`:""}</p>
+    <p style="margin:0 0 8px">כל מי שפותח את הקישור הזה רואה ועורך את אותה רשימה. שלחו אותו רק לבני הבית.</p>
+    <input class="field" id="share-url" readonly value="${esc(url)}" dir="ltr" style="width:100%;margin-bottom:10px">
+    <div class="actions" style="flex-wrap:wrap">
+      <a class="btn" href="https://wa.me/?text=${encodeURIComponent("הרשימה המשותפת שלנו במזווה: "+url)}" target="_blank" rel="noopener">שליחה בוואטסאפ</a>
+      <button class="btn" id="copy-url" type="button">העתקה</button>
+      <button class="btn" id="cancel" type="button">סגירה</button>
+    </div>
+    <p class="row-sub" style="margin-top:12px">באייפון: לפתוח את הקישור בספארי, ואז שיתוף ← "הוספה למסך הבית".</p>`;
+  $("#copy-url").onclick=async()=>{try{await navigator.clipboard.writeText(url);toast("הקישור הועתק")}catch(e){$("#share-url").select();toast("סמן והעתק ידנית")}};
+  $("#cancel").onclick=closeSheet;
+}
+$("#sync-btn").onclick=openSync;
+loadLocal();const hashMsg=handleHash();render();connect();if(hashMsg)setTimeout(()=>toast(hashMsg),300);
+if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+/* one-time: move saved baby / pet products into the new categories (only those two, so manual choices elsewhere stay) */
+setTimeout(()=>{let done=false;try{done=localStorage.getItem("pantry.migr.cats2")==="1"}catch(e){}if(done)return;
+  getCatalog().then(cat=>{if(!cat)return;let n=0;
+    for(const i of Object.values(items)){const k=(i.barcodes||[]).map(b=>String(b).replace(/^0+/,"")).find(b=>cat.items[b]);if(!k)continue;
+      const c=cat.cats[cat.items[k][1]];if((c==="תינוקות"||c==="חיות מחמד")&&i.category!==c){putItem({...i,category:c});n++}}
+    try{localStorage.setItem("pantry.migr.cats2","1")}catch(e){}if(n)toast(`${n} מוצרים עברו לקטגוריות תינוקות / חיות מחמד`)})},2500);
+setTimeout(getCatalog,800);
+</script>
+</body>
+</html>

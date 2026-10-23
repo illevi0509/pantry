@@ -1,0 +1,9 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // one shared list per household; the household id is a long random code shared by link
+    match /households/{hid}/items/{itemId} {
+      allow read, write: if request.auth != null && hid.size() >= 20;
+    }
+  }
+}
