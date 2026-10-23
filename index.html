@@ -1163,6 +1163,14 @@ function handleHash(){
   if(hid&&/^h[a-z0-9]{20,40}$/.test(hid)&&hid!==getHousehold()){
     setHousehold(hid);items={};pending={};saveLocal();savePending();msg="הצטרפת לרשימה המשותפת";
   }
+  const z=P.get("z");
+  if(z){   // compressed import (deflate-raw + base64url), decoded asynchronously
+    (async()=>{try{const bin=Uint8Array.from(atob(z.replace(/-/g,"+").replace(/_/g,"/")+"===".slice((z.length+3)%4)),c=>c.charCodeAt(0));
+      const txt=await new Response(new Blob([bin]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).text();
+      let n=0;for(const it of JSON.parse(txt)){if(!it||!it.id||!it.name||items[it.id])continue;items[it.id]=it;queue(it.id,{op:"set",item:it});n++}
+      saveLocal();render();flushPending();toast(`יובאו ${n} מוצרים מהגרסה הקודמת`);
+    }catch(e){toast("קישור הייבוא לא תקין")}})();
+  }
   const imp=P.get("import");
   if(imp){
     try{const arr=JSON.parse(b64dec(imp));let n=0;
