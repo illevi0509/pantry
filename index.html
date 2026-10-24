@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>המזווה</title>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#3F7F5E">
+<meta name="theme-color" content="#3B5BFD">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="המזווה">
@@ -14,16 +14,17 @@
 <link rel="icon" href="icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Secular+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
 :root{
-  --bg:#F6F3ED; --surface:#FFFFFF; --sunk:#F1EDE5; --ink:#2A2F2C; --muted:#7B807B; --line:#E9E3D8;
-  --stock:#3F7F5E; --stock-soft:#E4F0E8; --stock-ink:#FFFFFF;
-  --out:#C8603F; --out-soft:#FBE8E0; --out-ink:#FFFFFF;
-  --list:#EDB94A; --list-ink:#3A2C06;
-  --shadow:0 1px 2px rgba(60,50,30,.05),0 6px 20px -12px rgba(60,50,30,.18);
-  --display:"Secular One","Arial Hebrew",Arial,sans-serif;
+  --bg:#EEF1F8; --surface:#FFFFFF; --sunk:#E4E8F2; --ink:#16213E; --muted:#6A7391; --line:#DDE2EE;
+  --stock:#3B5BFD; --stock-soft:#E6EBFF; --stock-ink:#FFFFFF;
+  --out:#FF5B57; --out-soft:#FFE7E5; --out-ink:#FFFFFF;
+  --list:#FFD23F; --list-ink:#2B2200;
+  --hero:#3B5BFD; --hero-2:#6A4DF5; --hero-ink:#FFFFFF;
+  --shadow:0 1px 2px rgba(22,33,62,.06),0 10px 24px -14px rgba(22,33,62,.28);
+  --display:"Fredoka","Assistant",Arial,sans-serif;
   --body:"Assistant","Segoe UI",Arial,sans-serif;
   color-scheme:light;
   box-sizing:border-box;
@@ -32,20 +33,22 @@
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#161816; --surface:#1F2220; --sunk:#262A27; --ink:#ECEAE4; --muted:#9A9F99; --line:#2E322F;
-    --stock:#6DB28C; --stock-soft:#22332A; --stock-ink:#0E1A13;
-    --out:#E88A6A; --out-soft:#3A2620; --out-ink:#21100A;
-    --list:#E3B246; --list-ink:#2A2105;
-    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6);
+    --bg:#0F1426; --surface:#1A2140; --sunk:#232B4D; --ink:#EEF1FB; --muted:#9AA3C4; --line:#2B3459;
+    --stock:#8095FF; --stock-soft:#25305E; --stock-ink:#0B1030;
+    --out:#FF7C78; --out-soft:#45222B; --out-ink:#2A0A0A;
+    --list:#FFD23F; --list-ink:#2B2200;
+    --hero:#2C45D6; --hero-2:#5B3FD9; --hero-ink:#FFFFFF;
+    --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 26px -12px rgba(0,0,0,.7);
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#161816; --surface:#1F2220; --sunk:#262A27; --ink:#ECEAE4; --muted:#9A9F99; --line:#2E322F;
-  --stock:#6DB28C; --stock-soft:#22332A; --stock-ink:#0E1A13;
-  --out:#E88A6A; --out-soft:#3A2620; --out-ink:#21100A;
-  --list:#E3B246; --list-ink:#2A2105;
-  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6);
+    --bg:#0F1426; --surface:#1A2140; --sunk:#232B4D; --ink:#EEF1FB; --muted:#9AA3C4; --line:#2B3459;
+    --stock:#8095FF; --stock-soft:#25305E; --stock-ink:#0B1030;
+    --out:#FF7C78; --out-soft:#45222B; --out-ink:#2A0A0A;
+    --list:#FFD23F; --list-ink:#2B2200;
+    --hero:#2C45D6; --hero-2:#5B3FD9; --hero-ink:#FFFFFF;
+    --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 26px -12px rgba(0,0,0,.7);
   color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:inherit}
@@ -239,6 +242,27 @@ label{display:block;font-size:14px;font-weight:600;color:var(--muted);margin:12p
 .toast{position:fixed;inset-inline:16px;bottom:calc(100px + env(safe-area-inset-bottom,0px));margin:0 auto;max-width:420px;background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:14px;text-align:center;z-index:30;transition:opacity .2s;box-shadow:var(--shadow)}
 .toast[hidden]{display:none}
 #qr-hidden{position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
+
+/* ---------- redesign: bold header band, shelf-tag yellow, rounder type ---------- */
+header{margin:-18px -16px 16px;padding:calc(20px + env(safe-area-inset-top,0px)) 18px 22px;
+  background:linear-gradient(135deg,var(--hero) 0%,var(--hero-2) 100%);color:var(--hero-ink);border-radius:0 0 28px 28px;align-items:center}
+:root{padding-top:0}
+header h1{font-weight:700;font-size:clamp(30px,9vw,38px);letter-spacing:0}
+header .summary{color:rgba(255,255,255,.82)}
+header .theme-btn{background:rgba(255,255,255,.16);color:#fff;backdrop-filter:blur(6px)}
+header .theme-btn:active{background:rgba(255,255,255,.28)}
+.empty-state strong,.sheet h2,.verb b{font-weight:600}
+.badge{font-weight:700}
+.tab[aria-selected="true"]{color:var(--stock)}
+/* deals look like the yellow sale tags on Israeli supermarket shelves: the one loud element */
+.deal-banner{background:var(--list);color:var(--list-ink)}
+.deal-banner span{color:var(--list-ink);opacity:.7}
+.deal b{color:var(--list-ink);background:var(--list);border-radius:6px;padding:0 5px}
+.pc-deal{color:var(--ink)}
+.pc-deal::first-letter{font-size:inherit}
+.tile .tag{color:var(--list-ink);background:var(--list);border-radius:6px;padding:1px 5px;display:inline-block}
+.cmp-table small{color:var(--muted);font-weight:700}
+.tile.has-deal{box-shadow:var(--shadow),inset 0 0 0 2px var(--list)}
 </style>
 </head>
 <body>
