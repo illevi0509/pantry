@@ -1,0 +1,10 @@
+{
+  "files": [
+    [0, "../../pantry-prices/downloads/DATE/hazi_hinam_PriceFull7290700100008-000-206-XXXX.gz", "../../pantry-prices/downloads/DATE/hazi_hinam_PromoFull7290700100008-000-206-XXXX.gz"],
+    [1, "…/rami_levy_PriceFull…-017-….gz", "…/rami_levy_PromoFull…-017-….gz"],
+    [2, "…/victory_PriceFull…-026-….gz", "…/victory_PromoFull…-026-….gz"],
+    [3, "…/osher_ad_PriceFull…-031-….gz", "…/osher_ad_PromoFull…-031-….gz"],
+    [4, "…/yohananof_PriceFull…-024-….gz", "…/yohananof_PromoFull…-024-….gz"]
+  ],
+  "data_date": "YYYY-MM-DD"
+}
