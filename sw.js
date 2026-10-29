@@ -1,5 +1,5 @@
 // המזווה: offline support. App shell = cache first (updated in the background); price data = network first, cache fallback.
-const VER = "v6";
+const VER = "v7";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png",
   "https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(VER).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });

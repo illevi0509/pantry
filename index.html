@@ -263,6 +263,7 @@ header .theme-btn:active{background:rgba(255,255,255,.28)}
 .tile .tag{color:var(--list-ink);background:var(--list);border-radius:6px;padding:1px 5px;display:inline-block}
 .cmp-table small{color:var(--muted);font-weight:700}
 .tile.has-deal{box-shadow:var(--shadow),inset 0 0 0 2px var(--list)}
+.pc-scan{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-bottom:12px;background:var(--stock);color:var(--stock-ink);border-color:var(--stock);font-weight:700}
 </style>
 </head>
 <body>
@@ -969,10 +970,27 @@ async function openPriceCheck(){
   $("#sheet").innerHTML=`<h2>בדיקת מחיר ומבצעים</h2>
     <p class="row-sub" style="margin:-4px 0 10px">חיפוש בכל המוצרים של 5 הסניפים שלך. אפשר לכתוב מותג, סוג ומידה, למשל "האגיס פרידום מידה 3".</p>
     <form class="search" id="pc-form" style="margin-bottom:10px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="pc-q" type="search" placeholder="מה מחפשים?" autocomplete="off" enterkeyhint="search"></form>
+    <label class="btn pc-scan" for="pc-cam" role="button" tabindex="0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2"/><path d="M8 8v8M11 8v8M14 8v8M17 8v8"/></svg>סריקת ברקוד</label>
+    <input type="file" class="cam-input" id="pc-cam" accept="image/*" capture="environment" tabindex="-1" aria-hidden="true">
     <div id="pc-res" class="pc-res"><div class="status"><span class="spin"></span><span>טוען את קבצי הרשתות…</span></div></div>
     <div class="actions"><button class="btn" id="cancel">סגירה</button></div>`;
   $("#cancel").onclick=closeSheet;
   $("#pc-form").onsubmit=e=>{e.preventDefault();$("#pc-q").blur()};
+  // scan a barcode instead of typing: decode the photo, then show that one product's card
+  $("#pc-cam").onchange=async e=>{
+    const f=e.target.files&&e.target.files[0];e.target.value="";if(!f)return;
+    const res=$("#pc-res");res.innerHTML=`<div class="status"><span class="spin"></span><span>קורא את הברקוד…</span></div>`;
+    const code=await readBarcode(f);await loadCatIndex();
+    const meta=`<p class="row-sub" style="margin:0 2px">מחירים ומבצעים נכון ל-${fmtDate((pricesData&&pricesData.built)||"")}.</p>`;
+    if(!current||!current.pricecheck)return;
+    if(!code){res.innerHTML=`<div class="empty-state" style="box-shadow:none;background:var(--sunk)"><strong>לא זיהיתי ברקוד</strong>צלם שוב מקרוב, באור טוב, כשהברקוד ממלא כשליש מהתמונה.</div>`+meta;return}
+    const key=String(code).replace(/\D/g,"").replace(/^0+/,"");
+    const c=catIndex&&catIndex.find(x=>x.k===key);
+    $("#pc-q").value="";
+    if(!c){res.innerHTML=`<div class="empty-state" style="box-shadow:none;background:var(--sunk)"><strong>הברקוד ${esc(code)} לא נמכר באף אחד מהסניפים שלך</strong>ייתכן שזה מוצר של רשת אחרת, או מוצר במשקל.</div>`+meta;return}
+    const pr=pricesData&&pricesData.prices[c.k]?pricesData.prices[c.k]:[];
+    res.innerHTML=priceCard({...c,m:1,pr,nCh:pr.filter(x=>x!=null).length})+meta;
+  };
   loadDeals();await loadCatIndex();for(let w=0;w<20&&!deals;w++)await new Promise(r=>setTimeout(r,100));
   if(!current||!current.pricecheck)return;
   const meta=`<p class="row-sub" style="margin:0 2px">מחירים ומבצעים נכון ל-${fmtDate((pricesData&&pricesData.built)||"")}.</p>`;
@@ -983,7 +1001,7 @@ async function openPriceCheck(){
   };
   let tmr;$("#pc-q").oninput=()=>{clearTimeout(tmr);tmr=setTimeout(draw,150)};
   $("#pc-res").onclick=e=>{const b=e.target.closest("[data-addcat]");if(b){addFromCatalog(b.dataset.addcat);b.textContent="✓ ברשימה";b.disabled=true}};
-  draw();$("#pc-q").focus();
+  draw();if(!matchMedia("(pointer:coarse)").matches)$("#pc-q").focus();
 }
 
 /* share: scripted popups/navigator.share are often blocked inside the artifact frame,
