@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>המזווה</title>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#3B5BFD">
+<meta name="theme-color" content="#0A9467">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="המזווה">
@@ -19,12 +19,12 @@
 <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
 :root{
-  --bg:#EEF1F8; --surface:#FFFFFF; --sunk:#E4E8F2; --ink:#16213E; --muted:#6A7391; --line:#DDE2EE;
-  --stock:#3B5BFD; --stock-soft:#E6EBFF; --stock-ink:#FFFFFF;
-  --out:#FF5B57; --out-soft:#FFE7E5; --out-ink:#FFFFFF;
+  --bg:#F1F6F2; --surface:#FFFFFF; --sunk:#E3ECE6; --ink:#13241B; --muted:#52645A; --line:#D9E5DD;
+  --stock:#08875D; --stock-soft:#DCF2E7; --stock-ink:#FFFFFF;
+  --out:#EF5A4C; --out-soft:#FDE6E3; --out-ink:#FFFFFF;
   --list:#FFD23F; --list-ink:#2B2200;
-  --hero:#3B5BFD; --hero-2:#6A4DF5; --hero-ink:#FFFFFF;
-  --shadow:0 1px 2px rgba(22,33,62,.06),0 10px 24px -14px rgba(22,33,62,.28);
+  --hero:#0A9467; --hero-2:#13706B; --hero-ink:#FFFFFF;
+  --shadow:0 1px 2px rgba(19,36,27,.06),0 10px 24px -14px rgba(19,36,27,.28);
   --display:"Fredoka","Assistant",Arial,sans-serif;
   --body:"Assistant","Segoe UI",Arial,sans-serif;
   color-scheme:light;
@@ -34,22 +34,22 @@
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#0F1426; --surface:#1A2140; --sunk:#232B4D; --ink:#EEF1FB; --muted:#9AA3C4; --line:#2B3459;
-    --stock:#8095FF; --stock-soft:#25305E; --stock-ink:#0B1030;
-    --out:#FF7C78; --out-soft:#45222B; --out-ink:#2A0A0A;
+    --bg:#09110D; --surface:#121D17; --sunk:#1A2921; --ink:#E9F3EE; --muted:#9AAEA3; --line:#25362D;
+    --stock:#3DD39A; --stock-soft:#143426; --stock-ink:#05200F;
+    --out:#FF7C72; --out-soft:#45231F; --out-ink:#2A0A08;
     --list:#FFD23F; --list-ink:#2B2200;
-    --hero:#2C45D6; --hero-2:#5B3FD9; --hero-ink:#FFFFFF;
-    --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 26px -12px rgba(0,0,0,.7);
+    --hero:#0E3B2C; --hero-2:#0A2A26; --hero-ink:#FFFFFF;
+    --shadow:0 0 0 1px #22332A,0 12px 28px -16px rgba(0,0,0,.8);
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-    --bg:#0F1426; --surface:#1A2140; --sunk:#232B4D; --ink:#EEF1FB; --muted:#9AA3C4; --line:#2B3459;
-    --stock:#8095FF; --stock-soft:#25305E; --stock-ink:#0B1030;
-    --out:#FF7C78; --out-soft:#45222B; --out-ink:#2A0A0A;
+    --bg:#09110D; --surface:#121D17; --sunk:#1A2921; --ink:#E9F3EE; --muted:#9AAEA3; --line:#25362D;
+    --stock:#3DD39A; --stock-soft:#143426; --stock-ink:#05200F;
+    --out:#FF7C72; --out-soft:#45231F; --out-ink:#2A0A08;
     --list:#FFD23F; --list-ink:#2B2200;
-    --hero:#2C45D6; --hero-2:#5B3FD9; --hero-ink:#FFFFFF;
-    --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 26px -12px rgba(0,0,0,.7);
+    --hero:#0E3B2C; --hero-2:#0A2A26; --hero-ink:#FFFFFF;
+    --shadow:0 0 0 1px #22332A,0 12px 28px -16px rgba(0,0,0,.8);
   color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:inherit}
@@ -109,9 +109,9 @@ header h1{font-family:var(--display);font-weight:400;font-size:34px;line-height:
 
 .check{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);background:var(--surface);flex:none;display:grid;place-items:center;padding:0}
 .check svg{opacity:0}
-.row.bought .check{background:var(--stock);border-color:var(--stock)}
-.row.bought .check svg{opacity:1}
-.row.bought .row-name{text-decoration:line-through;color:var(--muted)}
+.row.incart .check{background:var(--stock);border-color:var(--stock)}
+.row.incart .check svg{opacity:1}
+.row.incart .row-name{text-decoration:line-through;color:var(--muted)}
 
 .empty-state{text-align:center;color:var(--muted);padding:40px 24px;background:var(--surface);border-radius:18px;box-shadow:var(--shadow)}
 .empty-state .big{font-size:40px;display:block;margin-bottom:6px}
@@ -121,7 +121,7 @@ header h1{font-family:var(--display);font-weight:400;font-size:34px;line-height:
 .quick-add input{flex:1;min-width:0}
 .field,.quick-add input,select{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
 .btn{border-radius:12px;padding:12px 16px;font-weight:700;background:var(--surface);border:1px solid var(--line);color:var(--ink)}
-.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.primary{background:var(--stock);color:var(--stock-ink);border-color:var(--stock)}
 a.btn{display:block}
 .btn.stock{background:var(--stock);color:var(--stock-ink);border-color:var(--stock)}
 .btn.out{background:var(--out);color:var(--out-ink);border-color:var(--out)}
@@ -165,7 +165,7 @@ a.btn{display:block}
 
 
 /* ---- v2: bottom tab bar (tabs at the edges, the two camera verbs in the middle) ---- */
-.dock{position:fixed;inset-inline:0;bottom:0;padding:0 0 env(safe-area-inset-bottom,0px);background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -6px 20px -14px rgba(60,50,30,.25);z-index:10}
+.dock{position:fixed;inset-inline:0;bottom:0;padding:0 0 env(safe-area-inset-bottom,0px);background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -6px 20px -14px rgba(8,30,20,.3);z-index:10}
 .bar{max-width:640px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;align-items:end;padding:6px 8px 8px}
 .navtab,.navact{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12px;font-weight:700;color:var(--muted);padding:4px 0;cursor:pointer;position:relative;-webkit-user-select:none;user-select:none;margin:0}
 .navtab[aria-selected="true"]{color:var(--stock)}
@@ -192,8 +192,8 @@ header h1{font-size:28px}
 .tile .tag{font-size:11px;color:var(--out);font-weight:700;line-height:1.2;unicode-bidi:plaintext}
 .tile .more{position:absolute;top:4px;inset-inline-end:4px;width:30px;height:30px;border:0;background:none;color:var(--muted);font-size:18px;border-radius:50%;line-height:1}
 .tile.has-deal{box-shadow:var(--shadow),inset 0 0 0 2px var(--out-soft)}
-.tile.bought{opacity:.35;transform:scale(.92)}
-.tile.bought .nm{text-decoration:line-through}
+.tile.incart{opacity:.5;box-shadow:none}
+.tile.incart .nm{text-decoration:line-through}
 .toast .undo{background:none;border:0;color:var(--list);font-weight:700;margin-inline-start:12px;padding:0;font-size:15px}
 
 .stepper.big{display:inline-flex}.stepper.big button{width:40px;height:40px;font-size:22px}.stepper.big output{min-width:34px;font-size:17px}
@@ -222,7 +222,7 @@ header h1{font-size:28px}
 .pc-price s{color:var(--muted);font-weight:400}
 .pc-deal{grid-column:2;font-size:12.5px;color:var(--out);unicode-bidi:plaintext}
 /* sheet */
-.backdrop{position:fixed;inset:0;background:rgba(30,25,15,.4);display:flex;align-items:flex-end;justify-content:center;z-index:20}
+.backdrop{position:fixed;inset:0;background:rgba(6,22,15,.45);display:flex;align-items:flex-end;justify-content:center;z-index:20}
 .backdrop[hidden]{display:none}
 .sheet{background:var(--surface);width:100%;max-width:640px;max-height:92%;overflow:auto;border-radius:24px 24px 0 0;padding:10px 18px calc(20px + env(safe-area-inset-bottom,0px));animation:up .22s ease-out}
 .sheet::before{content:"";display:block;width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 14px}
@@ -265,14 +265,96 @@ header .theme-btn:active{background:rgba(255,255,255,.28)}
 .cmp-table small{color:var(--muted);font-weight:700}
 .tile.has-deal{box-shadow:var(--shadow),inset 0 0 0 2px var(--list)}
 .pc-scan{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-bottom:12px;background:var(--stock);color:var(--stock-ink);border-color:var(--stock);font-weight:700}
+/* ---------- v3: shopping list: one compact toolbar, aisles in both views, a cart until "done" ---------- */
+.list-bar{display:flex;gap:8px;align-items:center;margin:0 0 6px}
+.list-bar .btn{padding:10px 14px;font-size:15px}
+.list-bar .btn.stock{flex:1}
+.list-bar .view-toggle{margin:0;margin-inline-start:auto;flex:none}
+.view-toggle button{display:grid;place-items:center;width:42px;height:38px;padding:0}
+.tile-cat{font-size:14px;margin:18px 4px 8px}
+.tile-cat .n{font-weight:600;opacity:.8}
+.tile-wrap{position:relative}
+.tile{width:100%;height:100%;border:0;color:var(--ink);font:inherit;padding:14px 6px 10px;min-height:112px;transition:transform .15s,opacity .2s,box-shadow .2s}
+.tile .nm{font-size:14.5px}
+.tile .tag{font-size:12px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;margin-top:auto}
+.tile-wrap .more{position:absolute;top:0;inset-inline-end:0;width:44px;height:44px;border:0;background:none;color:var(--muted);font-size:20px;line-height:1;border-radius:14px;display:grid;place-items:center}
+@media (max-width:339px){.tiles{grid-template-columns:repeat(2,1fr)}}
+.check{color:var(--stock-ink);position:relative}
+.check::after{content:"";position:absolute;inset:-8px}
+.stepper button{position:relative}
+.stepper button::after{content:"";position:absolute;inset:-6px 0}
+.stepper.buy button{width:34px;height:34px}
+.cart{margin-top:20px;background:var(--sunk);border-radius:18px;padding:4px 10px 10px}
+.cart-head{display:flex;align-items:center;gap:8px}
+.cart-toggle{flex:1;border:0;background:none;text-align:start;font-weight:700;font-size:16px;padding:12px 4px;display:flex;align-items:center;gap:8px;color:var(--ink)}
+.cart-toggle b{background:var(--surface);border-radius:999px;padding:0 8px;font-size:14px}
+.cart-toggle svg{transition:transform .2s;color:var(--muted)}
+.cart-toggle[aria-expanded="false"] svg{transform:rotate(90deg)}
+.cart .btn{padding:9px 14px;font-size:15px}
+.cart .tile-cat{margin-top:8px}
+.cart .rows{box-shadow:none}
+.all-done{padding:28px 20px}
+.list-foot{display:flex;flex-direction:column;align-items:center;gap:2px;margin-top:14px}
+.list-foot .hint{margin-top:0}
+/* aisle colors: a soft tint behind the icon, a dot before the heading */
+.thumb[style*="--c"],.tile .em{background:var(--sunk);background:color-mix(in srgb,var(--c) 20%,var(--surface))}
+.tile .em{width:54px;height:54px;border-radius:17px;display:grid;place-items:center;font-size:30px;margin-bottom:2px}
+.tile .em:has(img){background:none}
+.cat[style*="--c"] span:first-child,.tile-cat span:first-child{display:inline-flex;align-items:center;gap:7px}
+.cat[style*="--c"] span:first-child::before,.tile-cat span:first-child::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--c)}
+.tile.incart .em{filter:grayscale(1)}
+/* moving to / from the cart */
+@keyframes toCart{to{transform:translateY(18px) scale(.82);opacity:0}}
+@keyframes fromCart{to{transform:translateY(-18px) scale(.9);opacity:0}}
+@keyframes arrive{from{transform:scale(.85);opacity:0}}
+@keyframes bump{40%{transform:scale(1.4)}}
+.to-cart{animation:toCart .22s ease-in forwards;pointer-events:none}
+.from-cart{animation:fromCart .22s ease-in forwards;pointer-events:none}
+.row.to-cart .check{background:var(--stock);border-color:var(--stock)}
+.row.to-cart .check svg{opacity:1}
+.arrive{animation:arrive .28s cubic-bezier(.2,.9,.3,1.3)}
+.cart-toggle b{display:inline-block}
+.cart-toggle b.bump{animation:bump .4s ease-out}
+
+/* ---------- v4: header counts, the basket as a shelf tag, outlined chips ---------- */
+header .summary{color:var(--hero-ink)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+.stat{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:8px 12px 7px;display:flex;flex-direction:column;min-width:0}
+.stat b{font-family:var(--display);font-size:28px;font-weight:600;line-height:1.05;font-variant-numeric:tabular-nums}
+.stat span{font-size:13px;color:rgba(255,255,255,.8)}
+.sync-note{font-size:13px;color:rgba(255,255,255,.82);margin:8px 2px 0}
+/* a real shelf tag: yellow, punched hole at the end, shekels big and agorot small */
+.shelf-tag{position:relative;display:grid;grid-template-columns:1fr auto;align-items:center;column-gap:12px;width:100%;margin:2px 0 14px;
+  border:0;text-align:start;background:var(--list);color:var(--list-ink);border-radius:16px;padding:12px 18px 12px 40px;
+  box-shadow:0 10px 22px -14px rgba(110,80,0,.7);transform:rotate(-1.2deg);cursor:pointer}
+.shelf-tag::before{content:"";position:absolute;inset-inline-end:16px;top:50%;width:12px;height:12px;margin-top:-6px;border-radius:50%;background:var(--bg);box-shadow:inset 0 1px 2px rgba(0,0,0,.35)}
+.shelf-tag:active{transform:rotate(-1.2deg) scale(.98)}
+.st-l{grid-column:1;font-size:14px;font-weight:600;opacity:.75}
+.st-chain{grid-column:1;font-family:var(--display);font-weight:600;font-size:26px;line-height:1.1}
+.st-sum{grid-column:2;grid-row:1/3;font-family:var(--display);font-weight:700;font-size:40px;line-height:1;font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate;white-space:nowrap}
+.st-sum sup{font-size:18px;vertical-align:top;position:relative;top:4px;margin-inline-start:1px}
+.st-sh{font-size:20px;margin-inline-end:2px;vertical-align:top;position:relative;top:5px}
+.st-foot{grid-column:1/-1;font-size:13px;font-weight:600;opacity:.75;margin-top:6px;padding-top:6px;border-top:1.5px dashed rgba(43,34,0,.3);line-height:1.4}
+/* chips: tinted fill with a matching outline, like status pills */
+.chip{background:color-mix(in srgb,var(--stock) 12%,transparent);color:var(--stock);border:1px solid color-mix(in srgb,var(--stock) 40%,transparent);line-height:18px;margin-inline-end:4px}
+.chip.out{background:color-mix(in srgb,var(--out) 12%,transparent);color:var(--out);border-color:color-mix(in srgb,var(--out) 40%,transparent)}
+.tile .qb{background:color-mix(in srgb,var(--c) 16%,var(--surface));color:var(--ink);border:1px solid color-mix(in srgb,var(--c) 45%,transparent);line-height:18px}
+
+/* header buttons: line icons, sync state as a dot */
+header .theme-btn{gap:6px;min-height:36px}
+header .theme-btn.icon{width:38px;justify-content:center;padding:0;position:relative}
+#sync-btn::after{content:"";position:absolute;top:5px;inset-inline-end:5px;width:8px;height:8px;border-radius:50%;background:#FFD23F;box-shadow:0 0 0 2px var(--hero)}
+#sync-btn[data-state="live"]::after{background:#5BE3A8}
+#sync-btn[data-state="error"]::after{background:#FF7C72}
+@media (prefers-reduced-motion:reduce){.tile,.cart-toggle svg{transition:none}.arrive,.cart-toggle b.bump{animation:none}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <h1>המזווה 🧺</h1>
-    <div class="hdr-btns"><button class="theme-btn" id="price-btn" type="button" aria-label="בדיקת מחיר ומבצעים">🏷️ בדיקת מחיר</button><button class="theme-btn" id="sync-btn" type="button" aria-label="סנכרון ושיתוף">👥</button><button class="theme-btn" id="theme-btn" type="button"></button></div>
-    <p class="summary" id="summary">טוען…</p>
+    <div class="hdr-btns"><button class="theme-btn" id="price-btn" type="button" aria-label="בדיקת מחיר ומבצעים"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>בדיקת מחיר</button><button class="theme-btn icon" id="sync-btn" type="button" aria-label="סנכרון ושיתוף"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 20v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V20"/><circle cx="9" cy="7.5" r="3.5"/><path d="M22 20v-1.5a4 4 0 0 0-3-3.9M16 4.1a3.5 3.5 0 0 1 0 6.8"/></svg></button><button class="theme-btn" id="theme-btn" type="button"></button></div>
+    <div class="summary" id="summary">טוען…</div>
   </header>
   <form class="search" id="search-wrap" hidden>
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
@@ -340,6 +422,7 @@ async function flushPending(){
   finally{flushing=false;render()}
 }
 async function putItem(it){
+  if(!it.onList)delete it.inCart;   // "in the cart" only means something while the item is on the list
   it.updatedAt=Date.now(); items[it.id]=it; saveLocal();
   queue(it.id,{op:"set",item:it}); render();
   if(await pushOne(it.id)) render();
@@ -490,7 +573,6 @@ const byName=name=>{const n=name.trim();return Object.values(items).find(i=>i.na
 
 /* ---------- views ---------- */
 let tab="stock";
-const bought=new Set();
 function groupByCat(list){
   const g={};list.forEach(i=>{(g[i.category]||(g[i.category]=[])).push(i)});
   return CATS.filter(c=>g[c]).map(c=>[c,g[c].sort((a,b)=>a.name.localeCompare(b.name,"he"))]);
@@ -498,7 +580,10 @@ function groupByCat(list){
 const CAT_ICON={"מוצרי חלב":"🥛","ירקות ופירות":"🥕","בשר ודגים":"🍗","לחם ומאפים":"🍞","יבשים ושימורים":"🥫","תבלינים ורטבים":"🧂","חטיפים ומתוקים":"🍫","משקאות":"🧃","קפואים":"🧊","ניקיון":"🧽","היגיינה":"🧴","תינוקות":"👶","חיות מחמד":"🐾","אחר":"🛒"};
 /* a photo is shown only for products without a barcode: for barcoded ones the saved photo is usually the barcode itself */
 const showThumb=i=>!!(i.thumb&&!(i.barcodes||[]).length);
-function thumbHtml(i){return showThumb(i)?`<img class="thumb" src="${i.thumb}" alt="">`:`<span class="thumb" aria-hidden="true">${CAT_ICON[i.category]||"🛒"}</span>`}
+/* one hue per aisle: shown as a soft tint behind the icon and a dot on the aisle heading, never as text color */
+const CAT_COLOR={"מוצרי חלב":"#4C9AFF","ירקות ופירות":"#2FBF71","בשר ודגים":"#F0565A","לחם ומאפים":"#E9A23B","יבשים ושימורים":"#B7835A","תבלינים ורטבים":"#F2743E","חטיפים ומתוקים":"#A66BE0","משקאות":"#1FB5B0","קפואים":"#5CC8F2","ניקיון":"#5B7CF0","היגיינה":"#EE7EB0","תינוקות":"#F5B84A","חיות מחמד":"#8E7364","אחר":"#98A2B3"};
+const catColor=c=>CAT_COLOR[c]||CAT_COLOR["אחר"];
+function thumbHtml(i){return showThumb(i)?`<img class="thumb" src="${i.thumb}" alt="">`:`<span class="thumb" aria-hidden="true" style="--c:${catColor(i.category)}">${CAT_ICON[i.category]||"🛒"}</span>`}
 /* how many units to buy (shopping list only); defaults to 1 */
 const bq=i=>Math.max(1,parseInt(i&&i.buyQty)||1);
 const withQty=i=>bq(i)>1?`${bq(i)} ${i.name}`:i.name;
@@ -567,9 +652,10 @@ function addFromCatalog(k){
 }
 /* shopping-list layout: tiles or rows, remembered per device */
 let listView="tiles";try{listView=localStorage.getItem("pantry.listView")||"tiles"}catch(e){}
+let cartOpen=true,justMoved=null;
 /* search: case/space/geresh-insensitive substring match */
 const norm=s=>String(s||"").toLowerCase().replace(/[׳'"״`]/g,"").replace(/\s+/g," ").trim();
-const catHead=(c,n)=>`<h3 class="cat"><span>${esc(c)}</span><span class="n">${n}</span></h3>`;
+const catHead=(c,n)=>`<h3 class="cat" style="--c:${catColor(c)}"><span>${esc(c)}</span><span class="n">${n}</span></h3>`;
 
 /* ---------- deals: active promotions per barcode, built from chains' PromoFull files ---------- */
 let deals=null,dealsLoading=false,nameToCode=null;
@@ -600,13 +686,21 @@ function render(){
   const all=Object.values(items);
   const stock=all.filter(i=>i.qty>0||!i.onList);
   const list=all.filter(i=>i.onList);
-  $("#list-count").textContent=list.length||"";
+  $("#list-count").textContent=list.filter(i=>!i.inCart).length||"";
   const pc=pendingCount();
-  $("#summary").textContent=(all.length?`${all.filter(i=>i.qty>0).length} מוצרים במלאי, ${list.length} ברשימת הקניות`:"המלאי והרשימה שלך, בצילום אחד")+(pc?` · ⏳ ${pc} ${pc===1?"שינוי ממתין":"שינויים ממתינים"} לסנכרון`:"")+(syncState==="error"?" · ⚠️ הסנכרון לא פעיל":"");
-  const sb=$("#sync-btn");if(sb)sb.textContent=syncState==="live"?"👥":syncState==="error"?"⚠️":"⏳";
+  // the header counts what matters on the current tab
+  const stat=(n,l)=>`<span class="stat"><b>${n}</b><span>${l}</span></span>`;
+  const inCartN=list.filter(i=>i.inCart).length;
+  const stats=tab==="list"
+    ?stat(list.length-inCartN,"לקנות")+stat(inCartN,"בעגלה")+stat(deals?list.filter(i=>!i.inCart&&dealsFor(i).length).length:"–","במבצע")
+    :stat(all.filter(i=>i.qty>0).length,"במלאי")+stat(all.filter(i=>i.qty<=0&&!i.onList).length,"אזלו")+stat(list.length,"ברשימה");
+  const note=(pc?`⏳ ${pc} ${pc===1?"שינוי ממתין":"שינויים ממתינים"} לסנכרון`:"")+(syncState==="error"?`${pc?" · ":""}⚠️ הסנכרון לא פעיל`:"");
+  $("#summary").innerHTML=(all.length?`<div class="stats">${stats}</div>`:"המלאי והרשימה שלך, בצילום אחד")+(note?`<p class="sync-note">${note}</p>`:"");
+  const sb=$("#sync-btn");if(sb)sb.dataset.state=syncState;   // a status dot on the people icon
   $("#tab-stock").setAttribute("aria-selected",tab==="stock");
   $("#tab-list").setAttribute("aria-selected",tab==="list");
   const v=$("#view");
+  const prevHtml=v._html;v._html=null;   // set again only by the list view (see below)
   $("#search-wrap").hidden=tab==="stock"&&!stock.length;
   $("#q-add").hidden=tab!=="list";
   if(tab==="stock"){
@@ -617,7 +711,7 @@ function render(){
     v.innerHTML=`<div class="rows">`+groupByCat(shown).map(([c,arr])=>catHead(c,arr.length)+arr.map(i=>`
       <div class="row ${i.qty<=0?"empty":""}">
         ${thumbHtml(i)}
-        <button class="row-main" data-edit="${i.id}"><span class="row-name">${esc(i.name)}</span>${i.qty<=0?`<span class="row-sub">אזל</span>`:""}${i.onList?`<span class="chip">ברשימה</span>`:""}</button>
+        <button class="row-main" data-edit="${i.id}"><span class="row-name">${esc(i.name)}</span>${i.qty<=0?`<span class="chip out">אזל</span>`:""}${i.onList?`<span class="chip">ברשימה</span>`:""}</button>
         <div class="stepper"><button data-dec="${i.id}" aria-label="פחות ${esc(i.name)}">−</button><output>${i.qty}</output><button data-inc="${i.id}" aria-label="עוד ${esc(i.name)}">+</button></div>
       </div>`).join("")).join("")+`</div>`;
   }else{
@@ -634,33 +728,58 @@ function render(){
     if(!list.length&&!qn){v.innerHTML=`<div class="empty-state"><span class="big" aria-hidden="true">✨</span><strong>אין מה לקנות</strong>מוצר שתצלם עם "נגמר" יופיע כאן, או הקלד שם למעלה ולחץ "הוסף".</div><div class="list-tools"><button class="btn" id="import" style="grid-column:1/-1">📥 ייבוא רשימה (מוואטסאפ, מייל או פתקים)</button></div>`;$("#import").onclick=openImport;return}
     if(!shownList.length){v.innerHTML=allSugg+`<div class="empty-state"><span class="big" aria-hidden="true">🔍</span><strong>"${esc(raw)}" לא ברשימה</strong>לחץ "הוסף" למעלה כדי להוסיף אותו.</div>`;return}
     loadDeals();
-    const withDeals=deals?list.filter(i=>dealsFor(i).length).length:0;
-    const banner=deals?`<div class="deal-banner">🏷️ ${withDeals?`${withDeals} מוצרים ברשימה במבצע`:"אין כרגע מבצעים על מוצרים ברשימה"} <span>· מבצעים נכון ל-${fmtDate(deals.built)}</span></div>`:"";
-    const tools=`<div class="list-tools top"><button class="btn stock" id="compare">השוואת מחירים</button><button class="btn" id="share">שליחת הרשימה</button><button class="btn" id="import" style="grid-column:1/-1">📥 ייבוא רשימה (מוואטסאפ, מייל או פתקים)</button></div>`;
-    const tileHtml=i=>{const ds=dealsFor(i),d=ds[0];
-      return `<div class="tile ${bought.has(i.id)?"bought":""} ${d?"has-deal":""}" data-buy="${i.id}" role="button" tabindex="0" aria-label="נקנה: ${esc(i.name)}">
+    // what is still to buy on top; what is already in the cart below it, until "done" moves it all to the pantry
+    const toBuy=shownList.filter(i=>!i.inCart),cart=shownList.filter(i=>i.inCart);
+    const withDeals=deals?list.filter(i=>!i.inCart&&dealsFor(i).length).length:0;
+    const dealLine=deals?(withDeals?`${withDeals} מוצרים ברשימה במבצע`:"אין כרגע מבצעים על מוצרים ברשימה"):"";
+    // once the price file is in, the list opens with its answer: a shelf tag naming the cheapest chain for this basket
+    if(!pricesData&&!pricesAsked){pricesAsked=true;loadPrices().then(p=>{if(p&&tab==="list")render()})}
+    const best=cheapestChain();
+    const nis=n=>{const [a,b]=Number(n).toFixed(2).split(".");return `<span class="st-sh">₪</span>${a}<sup>.${b}</sup>`};
+    const banner=best
+      ?`<button class="shelf-tag" id="best-tag" aria-label="השוואת מחירים: הסל הכי זול ב${esc(best.name)}, ${fmtNis(best.sum)} שקלים">
+          <span class="st-l">הסל שלך הכי זול ב</span><b class="st-chain">${esc(best.name)}</b>
+          <span class="st-sum">${nis(best.sum)}</span>
+          <small class="st-foot">${best.miss?`חסרים שם ${best.miss} מתוך ${best.n} מוצרים`:`כל ${best.n} המוצרים`}${dealLine?`<br>${dealLine}`:""}</small></button>`
+      :deals?`<div class="deal-banner">🏷️ ${dealLine} <span>· מבצעים נכון ל-${fmtDate(deals.built)}</span></div>`:"";
+    const icoTiles=`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>`;
+    const icoRows=`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>`;
+    const tools=`<div class="list-bar">${best?"":`<button class="btn stock" id="compare">השוואת מחירים</button>`}<button class="btn" id="share">שליחת הרשימה</button>
+      <div class="view-toggle" role="group" aria-label="תצוגת הרשימה"><button data-view="tiles" aria-pressed="${listView==="tiles"}" aria-label="אריחים">${icoTiles}</button><button data-view="rows" aria-pressed="${listView==="rows"}" aria-label="שורות">${icoRows}</button></div></div>`;
+    const tileHtml=i=>{const d=dealsFor(i)[0];
+      return `<div class="tile-wrap ${i.id===justMoved?"arrive":""}" style="--c:${catColor(i.category)}"><button class="tile ${i.inCart?"incart":""} ${d?"has-deal":""}" data-buy="${i.id}" aria-pressed="${!!i.inCart}" aria-label="${i.inCart?"להחזיר לרשימה":"לעגלה"}: ${esc(i.name)}">
         ${bq(i)>1?`<span class="qb">×${bq(i)}</span>`:""}
-        <button class="more" data-edit="${i.id}" aria-label="פרטים: ${esc(i.name)}">⋯</button>
         <span class="em">${showThumb(i)?`<img src="${i.thumb}" alt="">`:(CAT_ICON[i.category]||"🛒")}</span>
         <span class="nm">${esc(i.name)}</span>
-        ${d?`<span class="tag">🏷️ ${esc(d.chain)} ${d.mq>1?`${d.mq} ב־${fmtNis(d.tot)}`:`₪${fmtNis(d.tot)}`}</span>`:""}
-      </div>`};
+        ${d&&!i.inCart?`<span class="tag">🏷️ ${esc(d.chain)} ${d.mq>1?`${d.mq} ב־${fmtNis(d.tot)}`:`₪${fmtNis(d.tot)}`}</span>`:""}
+      </button><button class="more" data-edit="${i.id}" aria-label="פרטים: ${esc(i.name)}">⋯</button></div>`};
     const rowHtml=i=>`
-      <div class="row ${bought.has(i.id)?"bought":""}">
-        <button class="check" data-buy="${i.id}" aria-label="נקנה: ${esc(i.name)}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></button>
+      <div class="row ${i.inCart?"incart":""} ${i.id===justMoved?"arrive":""}">
+        <button class="check" data-buy="${i.id}" aria-pressed="${!!i.inCart}" aria-label="${i.inCart?"להחזיר לרשימה":"לעגלה"}: ${esc(i.name)}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></button>
         ${thumbHtml(i)}
-        <button class="row-main" data-edit="${i.id}"><span class="row-name">${esc(i.name)}</span><span class="row-sub">${i.qty>0?`יש בבית ${i.qty}`:""}</span>${dealsFor(i).map(dealHtml).join("")}</button>
+        <button class="row-main" data-edit="${i.id}"><span class="row-name">${esc(i.name)}</span><span class="row-sub">${i.qty>0?`יש בבית ${i.qty}`:""}</span>${i.inCart?"":dealsFor(i).slice(0,1).map(dealHtml).join("")}</button>
         <div class="stepper buy" aria-label="כמה לקנות"><button data-bdec="${i.id}" aria-label="פחות ${esc(i.name)} לקנייה">−</button><output>${bq(i)}</output><button data-binc="${i.id}" aria-label="עוד ${esc(i.name)} לקנייה">+</button></div>
       </div>`;
-    const viewToggle=qn?"":`<div class="view-toggle" role="group" aria-label="תצוגת הרשימה"><button data-view="tiles" aria-pressed="${listView==="tiles"}">▦ אריחים</button><button data-view="rows" aria-pressed="${listView==="rows"}">☰ שורות</button></div>`;
-    const body=listView==="rows"
-      ?`<div class="rows">`+groupByCat(shownList).map(([c,arr])=>catHead(c,arr.length)+arr.map(rowHtml).join("")).join("")+`</div>`
-      :`<div class="tiles">${groupByCat(shownList).flatMap(([c,arr])=>arr).map(tileHtml).join("")}</div>`;
-    v.innerHTML=(qn?allSugg:banner+tools)+viewToggle+body+
-      (qn?"":listView==="rows"?`<p class="hint">סמן מוצר כשקנית אותו, והוא יחזור למלאי · לחיצה על השם לפרטים</p>`:`<p class="hint">לחיצה על מוצר = קניתי, והוא חוזר למלאי · ⋯ לפרטים, כמות ומבצעים</p>`);
+    // aisles help while picking; the cart only needs to be checked at a glance, so it is one flat block
+    const group=(arr,flat)=>listView==="rows"
+      ?`<div class="rows">`+(flat?arr.map(rowHtml).join(""):groupByCat(arr).map(([c,a])=>catHead(c,a.length)+a.map(rowHtml).join("")).join(""))+`</div>`
+      :flat?`<div class="tiles">${arr.map(tileHtml).join("")}</div>`
+      :groupByCat(arr).map(([c,a])=>`<h3 class="tile-cat" style="--c:${catColor(c)}"><span>${esc(c)}</span><span class="n">${a.length}</span></h3><div class="tiles">${a.map(tileHtml).join("")}</div>`).join("");
+    const chev=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>`;
+    const cartHtml=cart.length?`<section class="cart"><div class="cart-head">
+        <button class="cart-toggle" data-cart="1" aria-expanded="${cartOpen}">${chev}🛒 בעגלה <b class="${justMoved&&items[justMoved]&&items[justMoved].inCart?"bump":""}">${cart.length}</b></button>
+        ${qn?"":`<button class="btn stock" id="done-shop">סיימתי, למלאי</button>`}</div>${cartOpen?group(cart,true):""}</section>`:"";
+    const body=toBuy.length?group(toBuy):`<div class="empty-state all-done"><span class="big" aria-hidden="true">🎉</span><strong>הכל בעגלה</strong>לחץ "סיימתי" והמוצרים יעברו למלאי.</div>`;
+    const html=(qn?allSugg:banner+tools)+body+cartHtml+
+      (qn?"":`<div class="list-foot"><p class="hint">${listView==="rows"?"סמן מה שנכנס לעגלה · לחיצה על השם לפרטים":"לחיצה על מוצר מכניסה אותו לעגלה · ⋯ לפרטים, כמות ומבצעים"}</p><button class="link" id="import">📥 ייבוא רשימה מוואטסאפ, מייל או פתקים</button></div>`);
+    // Firestore echoes every local write back at once; an identical page is left alone so the move animation can finish
+    v._html=html;if(html===prevHtml)return;
+    v.innerHTML=html;
     if($("#share"))$("#share").onclick=shareList;
     if($("#import"))$("#import").onclick=openImport;
     if($("#compare"))$("#compare").onclick=openCompare;
+    if($("#best-tag"))$("#best-tag").onclick=openCompare;
+    if($("#done-shop"))$("#done-shop").onclick=finishShopping;
   }
 }
 /* one field per tab: stock = search; list = search + add (Enter or "הוסף") */
@@ -692,11 +811,21 @@ $("#view").addEventListener("click",e=>{
   if(d.binc){const i=items[d.binc];putItem({...i,buyQty:bq(i)+1})}
   if(d.bdec){const i=items[d.bdec];if(bq(i)>1)putItem({...i,buyQty:bq(i)-1})}
   if(d.buy){
-    const id=d.buy;bought.add(id);render();
-    setTimeout(()=>{bought.delete(id);const i=items[id];if(i){const prev={...i};const n=bq(i);const {buyQty,...rest}=i;putItem({...rest,qty:Math.max(i.qty,0)+n,onList:false});toastUndo(`${i.name} חזר למלאי${n>1?` (${n})`:""}`,()=>putItem(prev))}},450);
+    const id=d.buy,i=items[id];if(!i)return;
+    const el=t.closest(".tile-wrap,.row");if(el&&el.classList.contains("moving"))return;
+    const go=()=>{const x=items[id];if(!x)return;justMoved=id;setTimeout(()=>{if(justMoved===id)justMoved=null},400);putItem({...x,inCart:!i.inCart})};
+    // the item slides out first, so the eye can follow it to (or back from) the cart
+    if(el&&!matchMedia("(prefers-reduced-motion: reduce)").matches){el.classList.add("moving",i.inCart?"from-cart":"to-cart");setTimeout(go,220)}else go();
   }
+  if(d.cart){cartOpen=!cartOpen;render()}
 });
-$("#view").addEventListener("keydown",e=>{const t=e.target.closest("[data-buy]");if(t&&e.target===t&&(e.key==="Enter"||e.key===" ")){e.preventDefault();t.click()}});
+/* end of a shopping trip: everything in the cart goes to the pantry, with one undo for all of it */
+function finishShopping(){
+  const cart=Object.values(items).filter(i=>i.onList&&i.inCart);if(!cart.length)return;
+  const prev=cart.map(i=>({...i}));
+  for(const i of cart){const n=bq(i);const {buyQty,inCart,...rest}=i;putItem({...rest,qty:Math.max(i.qty,0)+n,onList:false})}
+  toastUndo(`${cart.length} מוצרים עברו למלאי`,()=>prev.forEach(p=>putItem(p)));
+}
 $("#tab-stock").onclick=()=>switchTab("stock");
 $("#q").addEventListener("input",()=>render());
 $("#q").addEventListener("focus",()=>{if(tab==="list")ensureCatIndex()});
@@ -718,8 +847,15 @@ async function copyText(text,ta){
 /* ---------- basket comparison from the chains' own price + promo files ----------
    Prices are per branch, one unit of each item. A deal counts only if it applies to a single unit,
    is open to everyone (no club) and has no purchase condition; multi-buy deals are shown as a hint. */
-let pricesData=null;
+let pricesData=null,pricesAsked=false;
 function loadPrices(){return pricesData?Promise.resolve(pricesData):fetch("prices.json").then(r=>r.ok?r.json():null).then(j=>(pricesData=j)).catch(()=>null)}
+/* the chain to name on the list's shelf tag: fewest missing items first, then the lowest total (same order as the comparison) */
+function cheapestChain(){
+  if(!pricesData)return null;
+  const B=basket(),n=B.rows.length;if(n<2)return null;
+  const r=[...B.ranked].sort((x,y)=>((n-x.have)-(n-y.have))||(x.all-y.all))[0];
+  return {name:r.name,sum:r.all,miss:n-r.have,n};
+}
 function codeFor(i){
   const c=(i.barcodes||[]).map(x=>String(x).replace(/\D/g,"").replace(/^0+/,"")).find(Boolean);
   if(c)return c;
@@ -1205,12 +1341,13 @@ window.addEventListener("popstate",()=>{
 function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,2400)}
 
 /* theme: auto (follows the phone) -> light -> dark; remembered per device */
-const THEMES=[["auto","🌗"],["light","☀️"],["dark","🌙"]];
+const ICO=p=>`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+const THEMES=[["auto",ICO('<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/>')],["light",ICO('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>')],["dark",ICO('<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>')]];
 let theme="auto";try{theme=localStorage.getItem("pantry.theme")||"auto"}catch(e){}
 function applyTheme(){
   if(theme==="auto")document.documentElement.removeAttribute("data-theme");else document.documentElement.setAttribute("data-theme",theme);
   const t=THEMES.find(x=>x[0]===theme)||THEMES[0];
-  $("#theme-btn").textContent=t[1];$("#theme-btn").setAttribute("aria-label","מצב תצוגה: "+({auto:"אוטומטי",light:"בהיר",dark:"כהה"})[theme]+". לחץ להחלפה");
+  $("#theme-btn").innerHTML=t[1];$("#theme-btn").classList.add("icon");$("#theme-btn").setAttribute("aria-label","מצב תצוגה: "+({auto:"אוטומטי",light:"בהיר",dark:"כהה"})[theme]+". לחץ להחלפה");
 }
 $("#price-btn").onclick=openPriceCheck;
 $("#theme-btn").onclick=()=>{const i=THEMES.findIndex(x=>x[0]===theme);theme=THEMES[(i+1)%THEMES.length][0];try{localStorage.setItem("pantry.theme",theme)}catch(e){}applyTheme()};
