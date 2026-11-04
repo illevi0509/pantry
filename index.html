@@ -356,6 +356,8 @@ header .theme-btn.icon{width:38px;justify-content:center;padding:0;position:rela
 .scan-hint{position:relative;color:#fff;font-weight:700;margin:18px 16px 0;text-align:center;text-shadow:0 1px 3px #000}
 .scan-btns{position:absolute;bottom:calc(24px + env(safe-area-inset-bottom,0px));left:16px;right:16px;display:flex;gap:10px}
 .scan-btns .btn{flex:1;background:rgba(255,255,255,.92);color:#16213E;border:0;display:flex;align-items:center;justify-content:center;min-height:52px;margin:0;font-weight:700}
+.cat-img{width:78%;height:78%;object-fit:contain;display:block;margin:auto;pointer-events:none}
+.pc-em .cat-img,.row .thumb .cat-img{width:84%;height:84%}
 </style>
 </head>
 <body>
@@ -586,7 +588,10 @@ function groupByCat(list){
   const g={};list.forEach(i=>{(g[i.category]||(g[i.category]=[])).push(i)});
   return CATS.filter(c=>g[c]).map(c=>[c,g[c].sort((a,b)=>a.name.localeCompare(b.name,"he"))]);
 }
-const CAT_ICON={"מוצרי חלב":"🥛","ירקות ופירות":"🥕","בשר ודגים":"🍗","לחם ומאפים":"🍞","יבשים ושימורים":"🥫","תבלינים ורטבים":"🧂","חטיפים ומתוקים":"🍫","משקאות":"🧃","קפואים":"🧊","ניקיון":"🧽","היגיינה":"🧴","תינוקות":"👶","חיות מחמד":"🐾","אחר":"🛒"};
+const CAT_ICON_FILE={"מוצרי חלב":"dairy","ירקות ופירות":"produce","בשר ודגים":"meat","לחם ומאפים":"bread","יבשים ושימורים":"dry","תבלינים ורטבים":"spice","חטיפים ומתוקים":"sweets","משקאות":"drinks","קפואים":"frozen","ניקיון":"clean","היגיינה":"hygiene","תינוקות":"baby","חיות מחמד":"pets","אחר":"other"};
+/* category pictures: Microsoft Fluent Emoji 3D (MIT, see icons/cat/LICENSE-fluentui-emoji.txt), same on every phone */
+const catImg=c=>`<img class="cat-img" src="icons/cat/${CAT_ICON_FILE[c]||"other"}.png" alt="" loading="lazy" decoding="async">`;
+const CAT_ICON=new Proxy({},{get:(_,c)=>catImg(c)});
 /* a photo is shown only for products without a barcode: for barcoded ones the saved photo is usually the barcode itself */
 const showThumb=i=>!!(i.thumb&&!(i.barcodes||[]).length);
 /* one hue per aisle: shown as a soft tint behind the icon and a dot on the aisle heading, never as text color */
