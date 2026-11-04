@@ -358,6 +358,12 @@ header .theme-btn.icon{width:38px;justify-content:center;padding:0;position:rela
 .scan-btns .btn{flex:1;background:rgba(255,255,255,.92);color:#16213E;border:0;display:flex;align-items:center;justify-content:center;min-height:52px;margin:0;font-weight:700}
 .cat-img{width:78%;height:78%;object-fit:contain;display:block;margin:auto;pointer-events:none}
 .pc-em .cat-img,.row .thumb .cat-img{width:84%;height:84%}
+.pc-more{display:inline-block;margin-inline-start:6px;font-size:.82em;font-weight:700;color:var(--out);opacity:.9}
+.pc-best{display:inline-block;margin-inline-start:6px;font-size:.78em;font-weight:700;background:var(--list);color:var(--list-ink);border-radius:6px;padding:0 6px}
+.stale{color:var(--out);font-weight:700}
+.pc-em{width:40px;height:40px;flex:0 0 40px;display:grid;place-items:center;font-size:0}
+.pc-em .cat-img{width:100%;height:100%}
+.pc-more{margin-inline-start:10px}
 </style>
 </head>
 <body>
@@ -755,7 +761,7 @@ function render(){
           <span class="st-l">הסל שלך הכי זול ב</span><b class="st-chain">${esc(best.name)}</b>
           <span class="st-sum">${nis(best.sum)}</span>
           <small class="st-foot">${best.miss?`חסרים שם ${best.miss} מתוך ${best.n} מוצרים`:`כל ${best.n} המוצרים`}${dealLine?`<br>${dealLine}`:""}</small></button>`
-      :deals?`<div class="deal-banner">🏷️ ${dealLine} <span>· מבצעים נכון ל-${fmtDate(deals.built)}</span></div>`:"";
+      :deals?`<div class="deal-banner">🏷️ ${dealLine} <span>· מבצעים: ${dataAge(deals.built)}</span></div>`:"";
     const icoTiles=`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>`;
     const icoRows=`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>`;
     const tools=`<div class="list-bar">${best?"":`<button class="btn stock" id="compare">השוואת מחירים</button>`}<button class="btn" id="share">שליחת הרשימה</button>
@@ -919,7 +925,7 @@ async function openCompare(){
   if(!pricesData){$("#sheet").innerHTML=`<h2>השוואת מחירים</h2><p>לא הצלחתי לטעון את קובץ המחירים.</p>`+oshekBlock();bindOshek();return}
   const B=basket(),top=B.ranked[0],worst=B.ranked[B.ranked.length-1];
   const nCommon=B.common.length,nRows=B.rows.length;
-  let html=`<h2>השוואת מחירים</h2>${cmpTabs("basket")}<p class="row-sub" style="margin:0 0 12px">מחירים מהסניפים שלך · נכון ל-${fmtDate(pricesData.built)} · לפי הכמויות ברשימה</p>`;
+  let html=`<h2>השוואת מחירים</h2>${cmpTabs("basket")}<p class="row-sub" style="margin:0 0 12px">מחירים מהסניפים שלך · ${dataAge(pricesData.built)} (${fmtDate(pricesData.built)}) · לפי הכמויות ברשימה</p>`;
   if(!nRows){html+=`<div class="empty-state" style="box-shadow:none;background:var(--sunk)"><strong>אין מה להשוות</strong>למוצרים ברשימה אין ברקוד או התאמה לקטלוג.</div>`}
   else{
     // comparison 1: the whole basket, each chain with what it has (missing items shown)
@@ -1099,6 +1105,13 @@ function priceSearch(raw){
   hits.sort((a,b)=>(b.m-a.m)||(b.nCh-a.nCh)||(a.name.length-b.name.length));
   return hits.slice(0,20);
 }
+/* how old the price files are, in words; turns into a warning after a week */
+function dataAge(iso){
+  if(!iso)return "";
+  const d=Math.round((new Date(todayISO())-new Date(iso))/864e5);
+  const t=d<=0?"עודכן היום":d===1?"עודכן אתמול":d===2?"עודכן שלשום":`עודכן לפני ${d} ימים`;
+  return d>7?`<span class="stale">⚠️ ${t}</span>`:t;
+}
 function priceCard(h){
   const chains=(pricesData&&pricesData.chains)||[];
   const d=(deals&&deals.deals[h.k])||{},t=todayISO();
@@ -1112,7 +1125,7 @@ function priceCard(h){
     <div class="pc-head"><span class="pc-em" aria-hidden="true">${CAT_ICON[h.cat]||"🛒"}</span><b class="pc-name">${esc(h.name)}</b><button class="add-btn" data-addcat="${h.k}">+ לרשימה</button></div>
     <div class="pc-rows">${rows.map(r=>`<div class="pc-row ${r.eff!=null&&r.eff===min?"min":""} ${r.reg==null?"na":""}">
       <span class="pc-chain">${esc(r.name)}</span>
-      <span class="pc-price">${r.reg==null?"לא נמכר":r.x&&r.eff<r.reg?`<b>${fmtNis(r.eff)} ₪</b> <s>${fmtNis(r.reg)}</s>`:`${fmtNis(r.reg)} ₪`}</span>
+      <span class="pc-price">${r.reg==null?"לא נמכר":r.x&&r.eff<r.reg?`<b>${fmtNis(r.eff)} ₪</b> <s>${fmtNis(r.reg)}</s>`:`${fmtNis(r.reg)} ₪`}${r.eff!=null&&min!=null&&r.eff>min+0.004?`<span class="pc-more" dir="ltr">+${fmtNis(r.eff-min)} ₪</span>`:r.eff!=null&&r.eff===min&&avail.length>1?`<span class="pc-best">הכי זול</span>`:""}</span>
       ${r.x?`<span class="pc-deal">🏷️ ${r.x[0]>1?`${r.x[0]} ב־${fmtNis(r.x[1])} ₪`:`${fmtNis(r.x[1])} ₪`} · עד ${fmtDate(r.x[3])}${r.x[4]?" · מועדון":""}${r.x[5]?" · בתנאי":""}</span>`:""}
     </div>`).join("")}</div></div>`;
 }
@@ -1131,7 +1144,7 @@ async function openPriceCheck(){
   const showCode=async(f,known)=>{
     const res=$("#pc-res");res.innerHTML=`<div class="status"><span class="spin"></span><span>${known?"מחפש את המוצר…":"קורא את הברקוד…"}</span></div>`;
     const code=known||await readBarcode(f);await loadCatIndex();
-    const meta=`<p class="row-sub" style="margin:0 2px">מחירים ומבצעים נכון ל-${fmtDate((pricesData&&pricesData.built)||"")}.</p>`;
+    const meta=`<p class="row-sub" style="margin:0 2px">מחירים ומבצעים: ${dataAge((pricesData&&pricesData.built)||"")} (${fmtDate((pricesData&&pricesData.built)||"")}).</p>`;
     if(!current||!current.pricecheck)return;
     if(!code){res.innerHTML=`<div class="empty-state" style="box-shadow:none;background:var(--sunk)"><strong>לא זיהיתי ברקוד</strong>צלם שוב מקרוב, באור טוב, כשהברקוד ממלא כשליש מהתמונה.</div>`+meta;return}
     const key=String(code).replace(/\D/g,"").replace(/^0+/,"");
@@ -1145,7 +1158,7 @@ async function openPriceCheck(){
   $("#pc-sheet-scan").onclick=async e=>{if(!canLive())return;e.preventDefault();const code=await liveScan("pc-cam");if(code&&code!=="photo"&&current&&current.pricecheck)showCode(null,code)};
   loadDeals();await loadCatIndex();for(let w=0;w<20&&!deals;w++)await new Promise(r=>setTimeout(r,100));
   if(!current||!current.pricecheck)return;
-  const meta=`<p class="row-sub" style="margin:0 2px">מחירים ומבצעים נכון ל-${fmtDate((pricesData&&pricesData.built)||"")}.</p>`;
+  const meta=`<p class="row-sub" style="margin:0 2px">מחירים ומבצעים: ${dataAge((pricesData&&pricesData.built)||"")} (${fmtDate((pricesData&&pricesData.built)||"")}).</p>`;
   const draw=()=>{const q=$("#pc-q").value.trim();const res=$("#pc-res");if(!res)return;
     if(q.length<2){res.innerHTML=meta;return}
     const hits=priceSearch(q)||[];
