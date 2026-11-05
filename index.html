@@ -364,13 +364,22 @@ header .theme-btn.icon{width:38px;justify-content:center;padding:0;position:rela
 .pc-em{width:40px;height:40px;flex:0 0 40px;display:grid;place-items:center;font-size:0}
 .pc-em .cat-img{width:100%;height:100%}
 .pc-more{margin-inline-start:10px}
+.set-list{display:grid;gap:6px}
+.set-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--sunk);font-weight:600}
+.set-row input{width:20px;height:20px;accent-color:var(--stock)}
+.set-split{display:flex;align-items:center;gap:10px}.set-split .field{width:110px}
+.split{background:var(--sunk);border-radius:14px;padding:12px 14px;display:grid;gap:8px}
+.split.ok{background:var(--list);color:var(--list-ink)}
+.split.ok .row-sub{color:var(--list-ink);opacity:.8}
+.split-sum{margin:0;font-weight:600}
+.split-col{display:grid;gap:2px}.split-col span{line-height:1.5}.split-col em{font-style:normal;font-weight:700}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <h1>המזווה 🧺</h1>
-    <div class="hdr-btns"><button class="theme-btn" id="price-btn" type="button" aria-label="בדיקת מחיר ומבצעים"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>בדיקת מחיר</button><button class="theme-btn icon" id="sync-btn" type="button" aria-label="סנכרון ושיתוף"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 20v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V20"/><circle cx="9" cy="7.5" r="3.5"/><path d="M22 20v-1.5a4 4 0 0 0-3-3.9M16 4.1a3.5 3.5 0 0 1 0 6.8"/></svg></button><button class="theme-btn" id="theme-btn" type="button"></button></div>
+    <div class="hdr-btns"><button class="theme-btn" id="settings-btn" type="button" aria-label="הגדרות"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button><button class="theme-btn" id="price-btn" type="button" aria-label="בדיקת מחיר ומבצעים"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>בדיקת מחיר</button><button class="theme-btn icon" id="sync-btn" type="button" aria-label="סנכרון ושיתוף"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 20v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V20"/><circle cx="9" cy="7.5" r="3.5"/><path d="M22 20v-1.5a4 4 0 0 0-3-3.9M16 4.1a3.5 3.5 0 0 1 0 6.8"/></svg></button><button class="theme-btn" id="theme-btn" type="button"></button></div>
     <div class="summary" id="summary">טוען…</div>
   </header>
   <form class="search" id="search-wrap" hidden>
@@ -881,6 +890,48 @@ function codeFor(i){
   if(c)return c;
   return nameToCode&&nameToCode.has(i.name)?nameToCode.get(i.name):null;
 }
+/* ---------- settings (this device): club memberships per chain, minimum saving that justifies a second store ---------- */
+const SET_KEY="pantry.settings.v1";
+let settings={clubs:[],split:10};
+try{settings={...settings,...JSON.parse(localStorage.getItem(SET_KEY)||"{}")}}catch(e){}
+const saveSettings=()=>{try{localStorage.setItem(SET_KEY,JSON.stringify(settings))}catch(e){}};
+const isMember=c=>!!settings.clubs[c];
+function openSettings(){
+  current={settings:true};openSheet();
+  const chains=(pricesData&&pricesData.chains)||["חצי חינם","רמי לוי","ויקטורי","אושר עד","יוחננוף"];
+  $("#sheet").innerHTML=`<h2>הגדרות</h2>
+    <h3 class="cmp-h">מועדוני לקוחות</h3>
+    <p class="row-sub" style="margin:0 0 8px">סמנו את המועדונים שאתם חברים בהם. מבצעי מועדון של הרשתות האלה ייכנסו לחישוב הסל ולבדיקת המחיר.</p>
+    <div class="set-list">${chains.map((n,c)=>`<label class="set-row"><input type="checkbox" data-club="${c}" ${isMember(c)?"checked":""}><span>${esc(n)}</span></label>`).join("")}</div>
+    <h3 class="cmp-h" style="margin-top:18px">פיצול קנייה בין שתי רשתות</h3>
+    <p class="row-sub" style="margin:0 0 8px">ההשוואה תציע לקנות חלק מהמוצרים ברשת שנייה רק אם החיסכון הכולל גדול מהסכום הזה.</p>
+    <div class="set-split"><input class="field" id="set-split" type="number" inputmode="decimal" min="0" step="1" value="${settings.split}" dir="ltr"><span>₪ ומעלה</span></div>
+    <p class="row-sub" style="margin-top:14px">ההגדרות נשמרות בטלפון הזה בלבד.</p>
+    <div class="actions"><button class="btn primary" id="set-save" type="button">שמירה</button><button class="btn" id="cancel" type="button">ביטול</button></div>`;
+  $("#cancel").onclick=closeSheet;
+  $("#set-save").onclick=()=>{
+    settings.clubs=chains.map((_,c)=>$(`[data-club="${c}"]`).checked);
+    const v=parseFloat($("#set-split").value);settings.split=isFinite(v)&&v>=0?v:10;
+    saveSettings();closeSheet();render();toast("ההגדרות נשמרו");
+  };
+}
+/* split: start from the chain with the most items (cheapest among those), then find ONE second chain where
+   moving the items that are cheaper there saves the most. Recommend it only above the user's threshold. */
+function splitPlan(B){
+  const nRows=B.rows.length;if(nRows<2)return null;
+  const full=[...B.ranked].sort((x,y)=>((nRows-x.have)-(nRows-y.have))||(x.all-y.all)),base=full[0].c;
+  let best=null;
+  for(let c=0;c<B.chains.length;c++){if(c===base)continue;
+    const move=[],only=[];let save=0;
+    for(const r of B.rows){const a=r.line[base],b=r.line[c];
+      if(a==null&&b!=null)only.push(r);
+      else if(a!=null&&b!=null&&b<a-0.004){move.push({r,d:a-b});save+=a-b}}
+    if(!best||save>best.save)best={c,move,only,save:Math.round(save*100)/100};
+  }
+  if(!best)return null;
+  const keep=B.rows.filter(r=>r.line[base]!=null&&!best.move.some(m=>m.r===r));
+  return {base,second:best.c,keep,move:best.move.sort((x,y)=>y.d-x.d),only:best.only,save:best.save,worth:best.save>=settings.split&&best.move.length>0};
+}
 function basket(){
   const list=Object.values(items).filter(i=>i.onList);
   const chains=pricesData.chains,n=chains.length,t=todayISO();
@@ -894,7 +945,7 @@ function basket(){
       let p=reg[c],L=p==null?null:p*q;const x=d[c];
       if(p!=null&&x&&x[3]>=t){
         const [mq,tot,,,club,cond]=x;
-        if(!club&&!cond){
+        if((!club||isMember(c))&&!cond){
           if(mq===1&&tot<p){p=tot;L=p*q}
           else if(mq>1){
             multi[c]=`${mq} ב-${fmtNis(tot)}`;
@@ -936,6 +987,17 @@ async function openCompare(){
         <span class="rk-main"><b>${esc(r.name)}</b><small>${miss?`חסרים ${miss} מתוך ${nRows}`:`כל ${nRows} המוצרים`}</small></span>
         <span class="rk-sum">${fmtNis(r.all)} ₪</span></div>`}).join("")+`</div>
       <p class="row-sub" style="margin:6px 2px 0">רשת שחסרים בה מוצרים נראית זולה יותר, כי הם לא נספרים בסכום שלה. לכן הסידור הוא קודם לפי מספר החסרים.</p>`;
+    // the split suggestion: one main chain + the items worth buying at a second one
+    const sp=splitPlan(B);
+    if(sp&&sp.move.length){
+      const nb=B.chains[sp.base],ns=B.chains[sp.second];
+      html+=`<h3 class="cmp-h">פיצול בין שתי רשתות <span>סף: ${fmtNis(settings.split)} ₪ · <a href="#" id="go-settings">שינוי</a></span></h3>`;
+      html+=sp.worth?`<div class="split ok"><p class="split-sum">שווה לפצל: חיסכון של <b>${fmtNis(sp.save)} ₪</b></p>
+          <div class="split-col"><b>ב${esc(nb)}</b><span>כל השאר (${sp.keep.length} מוצרים)</span></div>
+          <div class="split-col"><b>ב${esc(ns)}</b><span>${sp.move.map(m=>`${esc(m.r.i.name)}${m.r.q>1?` ×${m.r.q}`:""} <em dir="ltr">−${fmtNis(m.d)} ₪</em>`).join(" · ")}</span></div>
+          ${sp.only.length?`<p class="row-sub">רק ב${esc(ns)}: ${sp.only.map(r=>esc(r.i.name)).join(", ")}</p>`:""}</div>`
+        :`<div class="split"><p class="split-sum">לא שווה לפצל: מעבר ל${esc(ns)} יחסוך רק ${fmtNis(sp.save)} ₪, פחות מהסף שקבעתם. הכי טוב לקנות הכל ב${esc(nb)}.</p></div>`;
+    }
     // comparison 2: only the items that every chain sells: an apples-to-apples total, however few they are
     const commonRank=[...B.ranked].sort((x,y)=>x.common-y.common),ct=commonRank[0],cw=commonRank[commonRank.length-1];
     html+=`<h3 class="cmp-h">רק מוצרים שיש בכל ${B.chains.length} הרשתות <span>${nCommon} מתוך ${nRows}</span></h3>`;
@@ -953,6 +1015,7 @@ async function openCompare(){
   if(B.noPrice.length)html+=`<p class="row-sub" style="margin-top:10px">לא נכללו (אין ברקוד או מחיר): ${B.noPrice.map(i=>esc(i.name)).join(", ")}</p>`;
   html+=oshekBlock();
   $("#sheet").innerHTML=html;bindOshek();bindCmpTabs();
+  const gs=$("#go-settings");if(gs)gs.onclick=e=>{e.preventDefault();openSettings()};
 }
 /* ---------- second comparison: chain price index over EVERY product sold in all 4 chains (not your list), one snapshot per data update ---------- */
 const cmpTabs=active=>`<div class="view-toggle cmp-tabs" role="tablist"><button data-cmp="basket" aria-pressed="${active==="basket"}">הסל שלי</button><button data-cmp="index" aria-pressed="${active==="index"}">מדד הרשתות</button></div>`;
@@ -1117,7 +1180,7 @@ function priceCard(h){
   const d=(deals&&deals.deals[h.k])||{},t=todayISO();
   const rows=chains.map((name,c)=>{
     const reg=h.pr[c];const x=d[c]&&d[c][3]>=t?d[c]:null;
-    let eff=reg;if(x&&x[0]===1&&!x[4]&&!x[5]&&reg!=null&&x[1]<reg)eff=x[1];
+    let eff=reg;if(x&&x[0]===1&&(!x[4]||isMember(c))&&!x[5]&&reg!=null&&x[1]<reg)eff=x[1];
     return {name,reg,x,eff};
   });
   const avail=rows.filter(r=>r.eff!=null),min=avail.length?Math.min(...avail.map(r=>r.eff)):null;
@@ -1126,7 +1189,7 @@ function priceCard(h){
     <div class="pc-rows">${rows.map(r=>`<div class="pc-row ${r.eff!=null&&r.eff===min?"min":""} ${r.reg==null?"na":""}">
       <span class="pc-chain">${esc(r.name)}</span>
       <span class="pc-price">${r.reg==null?"לא נמכר":r.x&&r.eff<r.reg?`<b>${fmtNis(r.eff)} ₪</b> <s>${fmtNis(r.reg)}</s>`:`${fmtNis(r.reg)} ₪`}${r.eff!=null&&min!=null&&r.eff>min+0.004?`<span class="pc-more" dir="ltr">+${fmtNis(r.eff-min)} ₪</span>`:r.eff!=null&&r.eff===min&&avail.length>1?`<span class="pc-best">הכי זול</span>`:""}</span>
-      ${r.x?`<span class="pc-deal">🏷️ ${r.x[0]>1?`${r.x[0]} ב־${fmtNis(r.x[1])} ₪`:`${fmtNis(r.x[1])} ₪`} · עד ${fmtDate(r.x[3])}${r.x[4]?" · מועדון":""}${r.x[5]?" · בתנאי":""}</span>`:""}
+      ${r.x?`<span class="pc-deal">🏷️ ${r.x[0]>1?`${r.x[0]} ב־${fmtNis(r.x[1])} ₪`:`${fmtNis(r.x[1])} ₪`} · עד ${fmtDate(r.x[3])}${r.x[4]?(isMember(rows.indexOf(r))?" · מועדון ✓":" · מועדון"):""}${r.x[5]?" · בתנאי":""}</span>`:""}
     </div>`).join("")}</div></div>`;
 }
 async function openPriceCheck(){
@@ -1487,6 +1550,7 @@ function openSync(){
   };
 }
 $("#sync-btn").onclick=openSync;
+$("#settings-btn").onclick=openSettings;
 loadLocal();const hashMsg=handleHash();render();connect();if(hashMsg)setTimeout(()=>toast(hashMsg),300);
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 /* one-time: move saved baby / pet products into the new categories (only those two, so manual choices elsewhere stay) */
