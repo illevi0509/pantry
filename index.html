@@ -749,8 +749,8 @@ function render(){
     const sRows=`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>`;
     const sBar=`<div class="list-bar stock-bar"><span class="row-sub">${shown.length} מוצרים</span><div class="view-toggle" role="group" aria-label="תצוגת המלאי"><button data-sview="tiles" aria-pressed="${stockView==="tiles"}" aria-label="אריחים">${sTiles}</button><button data-sview="rows" aria-pressed="${stockView==="rows"}" aria-label="שורות">${sRows}</button></div></div>`;
     if(stockView==="tiles"){
-      // one grid in category order: per-category grids leave half-empty rows when a category has 1–2 products
-      v.innerHTML=sBar+`<div class="tiles">`+groupByCat(shown).flatMap(([c,arr])=>arr).map(i=>`
+      // grouped by category, like the shopping list's tiles
+      v.innerHTML=sBar+groupByCat(shown).map(([c,arr])=>`<h3 class="tile-cat" style="--c:${catColor(c)}"><span>${esc(c)}</span><span class="n">${arr.length}</span></h3><div class="tiles">`+arr.map(i=>`
         <div class="tile-wrap" style="--c:${catColor(i.category)}"><div class="tile stock-tile ${i.qty<=0?"empty":""}">
           <button class="st-open" data-edit="${i.id}" aria-label="פרטים: ${esc(i.name)}">
             <span class="em">${showThumb(i)?`<img src="${i.thumb}" alt="">`:(CAT_ICON[i.category]||"🛒")}</span>
@@ -758,7 +758,7 @@ function render(){
             ${i.qty<=0?`<span class="chip out">אזל</span>`:i.onList?`<span class="chip">ברשימה</span>`:""}
           </button>
           <div class="stepper mini"><button data-dec="${i.id}" aria-label="פחות ${esc(i.name)}">−</button><output>${i.qty}</output><button data-inc="${i.id}" aria-label="עוד ${esc(i.name)}">+</button></div>
-        </div></div>`).join("")+`</div>`;
+        </div></div>`).join("")+`</div>`).join("");
       return;
     }
     v.innerHTML=sBar+`<div class="rows">`+groupByCat(shown).map(([c,arr])=>catHead(c,arr.length)+arr.map(i=>`
