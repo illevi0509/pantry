@@ -18,6 +18,11 @@ CHAINS = [
     {"key": "victory",    "name": "ויקטורי",  "chain_id": "7290696200003", "store": "026", "kind": "laib"},
     {"key": "osher_ad",   "name": "אושר עד",  "chain_id": "7290103152017", "store": "031", "kind": "cerberus", "user": "osherad"},
     {"key": "yohananof",  "name": "יוחננוף",  "chain_id": "7290803800003", "store": "024", "kind": "cerberus", "user": "yohananof"},
+    # Shufersal Deal and Be publish under the same chain id (sub-chains 002 / 005)
+    {"key": "shufersal",  "name": "שופרסל דיל", "chain_id": "7290027600007", "store": "144", "kind": "shufersal"},
+    {"key": "be",         "name": "Be",        "chain_id": "7290027600007", "store": "682", "kind": "shufersal", "group": "pharm"},
+    {"key": "super_pharm","name": "סופר-פארם", "chain_id": "7290172900007", "store": "243", "kind": "superpharm", "group": "pharm"},
+    {"key": "good_pharm", "name": "גוד פארם",  "chain_id": "7290058197699", "store": "251", "kind": "bina", "url": "https://goodpharm.binaprojects.com", "group": "pharm"},
 ]
 TYPES = ("PriceFull", "PromoFull")
 
@@ -117,7 +122,63 @@ def laib(c, sess):
     return {t: f"{api}/{c['chain_id']}/{n}" for t, n in pick_latest(names, c).items()}
 
 
-KINDS = {"cerberus": cerberus, "hazi": hazi, "laib": laib}
+# ---------- שופרסל + Be: prices.shufersal.co.il  (GET /FileObject/UpdateCategory?catID=2|4&storeId=N → HTML עם קישורי Azure; איטי, ~70 שניות; נבדק 5.11.2026) ----------
+def shufersal(c, sess):
+    out = {}
+    for t, cat in (("PriceFull", 2), ("PromoFull", 4)):
+        r = sess.get("https://prices.shufersal.co.il/FileObject/UpdateCategory",
+                     params={"catID": cat, "storeId": int(c["store"])}, headers=UA, timeout=240)
+        r.raise_for_status()
+        links = {html.unescape(h) for h in re.findall(r'href="(https://[^"]+?\.gz[^"]*)"', r.text, re.I)}
+        # signed blob links: match on the file name only
+        by_name = {os.path.basename(u.split("?")[0]): u for u in links}
+        got = pick_latest(list(by_name), c).get(t)
+        if got:
+            out[t] = by_name[got]
+    return out
+
+
+# ---------- סופר-פארם: prices.super-pharm.co.il  (?Category-equals=PriceFull&page=N, 20 בעמוד, החדשים קודם; /Download/<file>; נבדק 5.11.2026) ----------
+def superpharm(c, sess):
+    from urllib.parse import urljoin
+    base, out = "https://prices.super-pharm.co.il/", {}
+    for t in TYPES:
+        links = set()
+        for p in range(1, 40):
+            r = sess.get(base, params={"Category-equals": t, "page": p}, headers=UA, timeout=60)
+            r.raise_for_status()
+            found = {urljoin(base, html.unescape(h)) for h in re.findall(r'href="(/Download/[^"]+)"', r.text)}
+            if not found:
+                break
+            links |= found
+            by_name = {os.path.basename(u.split("?")[0]): u for u in links}
+            got = pick_latest(list(by_name), c).get(t)
+            if got:
+                out[t] = by_name[got]
+                break
+    return out
+
+
+# ---------- Bina Projects (גוד פארם): POST MainIO_Hok.aspx {WStore, WDate:"", WFileType:4|5} → JSON; POST Download.aspx?FileNm= → SPath; נבדק 5.11.2026 ----------
+def bina(c, sess):
+    base, out = c["url"].rstrip("/"), {}
+    hdr = {**UA, "X-Requested-With": "XMLHttpRequest"}
+    sess.get(base + "/Main.aspx", headers=UA, timeout=60)          # session cookie
+    for t, ft in (("PriceFull", 4), ("PromoFull", 5)):
+        r = sess.post(base + "/MainIO_Hok.aspx", data={"WStore": int(c["store"]), "WDate": "", "WFileType": ft}, headers=hdr, timeout=60)
+        r.raise_for_status()
+        names = [f.get("FileNm", "") for f in r.json()]
+        got = pick_latest(names, c).get(t)
+        if not got:
+            continue
+        d = sess.post(base + "/Download.aspx", params={"FileNm": got}, headers=hdr, timeout=60)
+        d.raise_for_status()
+        j = d.json()
+        out[t] = (j[0] if isinstance(j, list) else j).get("SPath")
+    return out
+
+
+KINDS = {"cerberus": cerberus, "hazi": hazi, "laib": laib, "shufersal": shufersal, "superpharm": superpharm, "bina": bina}
 
 
 def main():
@@ -134,7 +195,9 @@ def main():
                     raise RuntimeError(f"לא נמצא קובץ {t} לסניף {c['store']}")
             for t, u in urls.items():
                 fname = os.path.basename(u.split("?")[0])
-                if not fname.endswith(".gz"):
+                if fname.lower().endswith(".gz"):
+                    fname = fname[:-3] + ".gz"
+                else:
                     fname += ".gz"
                 dest = os.path.join(out, f"{c['key']}_{fname}")
                 size = download(sess, u, dest)

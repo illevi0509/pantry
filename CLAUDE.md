@@ -23,7 +23,7 @@
 | `deals.json` | ברקוד → {chainIdx: [minQty, total, regularTotal, endDate, club, cond]} |
 | `index_history.json` | "מדד הרשתות": snapshot לכל תאריך נתונים (סכום, כמה פעמים הכי זולה, % מעל הזולה) |
 | `firestore.rules` | עותק של כללי Firestore (הם מוגדרים במסוף, לא נפרסים מכאן) |
-| `tools/fetch_prices.py` | מוריד PriceFull + PromoFull לסניף אחד בכל רשת. נבדק מול כל 5 השרתים ב-23.10.2026 |
+| `tools/fetch_prices.py` | מוריד PriceFull + PromoFull לסניף אחד בכל רשת. נבדק מול 9 רשתות (23.10 + 5.11.2026) |
 | `tools/run_prices.bat` | מפעיל את ההורדה ב-Windows (מתקין requests, כותב ל-`downloads\YYYY-MM-DD`) |
 | `tools/build.py`, `tools/build_data.py` | בונים את קבצי ה-JSON מקבצי הרשתות. `python tools/build_data.py tools/config.json` |
 
