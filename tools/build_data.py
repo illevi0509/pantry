@@ -10,7 +10,10 @@ def load(f):
     try: t=raw.decode("utf-8-sig")
     except UnicodeDecodeError: t=raw.decode("utf-16")
     return ET.fromstring(t)
-CHAINS=["חצי חינם","רמי לוי","ויקטורי","אושר עד","יוחננוף"]
+CHAINS=["חצי חינם","רמי לוי","ויקטורי","אושר עד","יוחננוף","שופרסל דיל","Be","סופר-פארם","גוד פארם"]
+# 0 = supermarkets, 1 = pharmacies; the app compares baskets inside one group, and points out pharmacy bargains
+GROUPS=[0,0,0,0,0,0,1,1,1]
+GROUP_NAMES=["סופרים","פארם"]
 # (chain index, PriceFull path, PromoFull path or None)
 cfg=json.load(open(sys.argv[1]))
 ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))   # repo root: the app reads the JSON files from there
@@ -54,7 +57,7 @@ for ci,_,promo in cfg["files"]:
         for x in p.iter("MinPurchaseAmount"):
             try: mpa=max(mpa,float(x.text or 0))
             except ValueError: pass
-        cond=1 if (mpa>0 or re.search(r"מעל\s*\d+|קופון",g("PromotionDescription"))) else 0
+        cond=1 if (mpa>0 or g("AdditionalIsCoupon")=="1" or re.search(r"מעל\s*\d+|קופון",g("PromotionDescription"))) else 0
         for it in p.iter("PromotionItem"):
             gi=lambda k:(it.findtext(k) or "").strip()
             if gi("bIsWeighted")=="1": stat["weighted"]+=1; continue
@@ -62,7 +65,7 @@ for ci,_,promo in cfg["files"]:
             try: mq=float(gi("MinQty") or 1); tot=float(gi("DiscountedPrice"))
             except ValueError: stat["noprice"]+=1; continue
             if 0<mq<1: mq=1.0
-            if mq<1 or mq!=int(mq) or tot<=0: stat["badqty"]+=1; continue
+            if mq<1 or mq!=int(mq) or mq>24 or tot<=0: stat["badqty"]+=1; continue   # >24: garbage like 5990 in Rami Levy files
             mq=int(mq); unit=tot/mq
             reg=regular.get(key,{}).get(ci)
             if reg is not None and unit>=reg-0.01: stat["nosaving"]+=1; continue
@@ -80,27 +83,32 @@ for k,d in regular.items():
     if k not in items: continue
     row=[round(d[c],2) if c in d else None for c in range(len(CHAINS))]
     if any(v is not None for v in row): pr[k]=row
-json.dump({"v":1,"built":cfg.get("data_date",today),"chains":CHAINS,"prices":pr},open(cfg.get("prices_out",os.path.join(ROOT,"prices.json")),"w",encoding="utf-8"),separators=(",",":"))
+json.dump({"v":2,"built":cfg.get("data_date",today),"chains":CHAINS,"groups":GROUPS,"groupNames":GROUP_NAMES,"prices":pr},open(cfg.get("prices_out",os.path.join(ROOT,"prices.json")),"w",encoding="utf-8"),separators=(",",":"))
 print("prices",len(pr))
 
 # ---- chain price index: every product sold in ALL chains, regular shelf prices; one snapshot per data date ----
 import statistics, os.path
-full=[(k,v) for k,v in pr.items() if all(x is not None for x in v)]
-sums=[round(sum(v[c] for k,v in full),2) for c in range(len(CHAINS))]
-cheapest=[0]*len(CHAINS)
-ratios=[[] for _ in CHAINS]
+# the index covers the supermarkets only (pharmacies sell a different range)
+SUP=[c for c in range(len(CHAINS)) if GROUPS[c]==0]
+full=[(k,[v[c] for c in SUP]) for k,v in pr.items() if all(v[c] is not None for c in SUP)]
+IDX_CHAINS=[CHAINS[c] for c in SUP]
+sums=[round(sum(v[c] for k,v in full),2) for c in range(len(SUP))]
+cheapest=[0]*len(SUP)
+ratios=[[] for _ in SUP]
 for k,v in full:
     m=min(v)
-    for c in range(len(CHAINS)):
+    for c in range(len(SUP)):
         if v[c]==m: cheapest[c]+=1
         ratios[c].append(v[c]/m-1)
 snap={"date":cfg.get("data_date",today),"items":len(full),"sum":sums,"cheapest":cheapest,
       "avgAbove":[round(statistics.mean(r)*100,1) for r in ratios]}
 hp=cfg.get("history_out",os.path.join(ROOT,"index_history.json"))
-hist={"chains":CHAINS,"snapshots":[]}
+hist={"chains":IDX_CHAINS,"snapshots":[]}
 if os.path.exists(hp):
     try: hist=json.load(open(hp,encoding="utf-8"))
     except Exception: pass
+if hist.get("chains")!=IDX_CHAINS:   # chain set changed: older snapshots are not comparable
+    hist={"chains":IDX_CHAINS,"snapshots":[]}
 hist["snapshots"]=[s for s in hist["snapshots"] if s["date"]!=snap["date"]]+[snap]
 hist["snapshots"].sort(key=lambda s:s["date"])
 json.dump(hist,open(hp,"w",encoding="utf-8"),ensure_ascii=False,separators=(",",":"))

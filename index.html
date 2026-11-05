@@ -764,12 +764,13 @@ function render(){
     // once the price file is in, the list opens with its answer: a shelf tag naming the cheapest chain for this basket
     if(!pricesData&&!pricesAsked){pricesAsked=true;loadPrices().then(p=>{if(p&&tab==="list")render()})}
     const best=cheapestChain();
+    const pt=best?pharmTips():[];
     const nis=n=>{const [a,b]=Number(n).toFixed(2).split(".");return `<span class="st-sh">₪</span>${a}<sup>.${b}</sup>`};
     const banner=best
       ?`<button class="shelf-tag" id="best-tag" aria-label="השוואת מחירים: הסל הכי זול ב${esc(best.name)}, ${fmtNis(best.sum)} שקלים">
           <span class="st-l">הסל שלך הכי זול ב</span><b class="st-chain">${esc(best.name)}</b>
           <span class="st-sum">${nis(best.sum)}</span>
-          <small class="st-foot">${best.miss?`חסרים שם ${best.miss} מתוך ${best.n} מוצרים`:`כל ${best.n} המוצרים`}${dealLine?`<br>${dealLine}`:""}</small></button>`
+          <small class="st-foot">${best.miss?`חסרים שם ${best.miss} מתוך ${best.n} מוצרים`:`כל ${best.n} המוצרים`}${dealLine?`<br>${dealLine}`:""}${pt.length?`<br><b>💊 ${pt.length===1?"מוצר אחד זול":`${pt.length} מוצרים זולים`} יותר בפארם · עד ${fmtNis(pt.reduce((s,x)=>s+x.save,0))} ₪</b>`:""}</small></button>`
       :deals?`<div class="deal-banner">🏷️ ${dealLine} <span>· מבצעים: ${dataAge(deals.built)}</span></div>`:"";
     const icoTiles=`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>`;
     const icoRows=`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>`;
@@ -932,28 +933,53 @@ function splitPlan(B){
   const keep=B.rows.filter(r=>r.line[base]!=null&&!best.move.some(m=>m.r===r));
   return {base,second:best.c,keep,move:best.move.sort((x,y)=>y.d-x.d),only:best.only,save:best.save,worth:best.save>=settings.split&&best.move.length>0};
 }
-function basket(){
+/* chain groups: 0 = supermarkets, 1 = pharmacies (prices.json v2). Baskets are compared inside one group. */
+const groupOf=c=>(pricesData&&pricesData.groups)?pricesData.groups[c]:0;
+const groupIdx=g=>((pricesData&&pricesData.chains)||[]).map((_,c)=>c).filter(c=>groupOf(c)===g);
+/* items on the list that are cheaper at a pharmacy than at the cheapest supermarket that sells them.
+   A multi-buy deal counts when it applies to the quantity on the list, or (shown as a hint) when buying a few more would. */
+function pharmTips(){
+  if(!pricesData||!pricesData.groups||!groupIdx(1).length)return [];
+  const S=basket(0),P=basket(1),t=todayISO(),out=[];
+  const pById=new Map(P.rows.map(r=>[r.i.id,r]));
+  for(const r of S.rows){
+    const pr=pById.get(r.i.id);if(!pr)continue;
+    const sv=r.line.filter(x=>x!=null);if(!sv.length)continue;
+    const sMin=Math.min(...sv);
+    let best=null;
+    pr.line.forEach((L,j)=>{if(L!=null&&L<sMin-0.49&&(!best||L<best.L))best={L,j}});
+    // a multi-buy at a pharmacy that needs more than the listed quantity: per-unit comparison
+    const k=codeFor(r.i),d=(deals&&deals.deals[k])||{};
+    P.idx.forEach((gc,j)=>{const x=d[gc];if(!x||x[3]<t||x[5]||(x[4]&&!isMember(gc)))return;
+      const [mq,tot]=x;if(mq<=r.q)return;const sUnit=sMin/r.q,pUnit=tot/mq;
+      if(pUnit<sUnit-0.2&&!best)best={L:null,j,mq,tot,save:(sUnit-pUnit)*mq}});
+    if(best)out.push({i:r.i,q:r.q,chain:P.chains[best.j],sMin,...best,save:best.L!=null?sMin-best.L:best.save,
+      sChain:S.chains[r.line.indexOf(sMin)]});
+  }
+  return out.sort((a,b)=>b.save-a.save);
+}
+function basket(g=0){
   const list=Object.values(items).filter(i=>i.onList);
-  const chains=pricesData.chains,n=chains.length,t=todayISO();
+  const idx=groupIdx(g),chains=idx.map(c=>pricesData.chains[c]),n=chains.length,t=todayISO();
   const rows=[],noPrice=[];
   for(const i of list){
     const k=codeFor(i),reg=k&&pricesData.prices[k];
     if(!reg){noPrice.push(i);continue}
     const d=(deals&&deals.deals[k])||{};
     const q=bq(i),unit=[],multi=[],line=[];
-    for(let c=0;c<n;c++){
+    for(let j=0;j<n;j++){const c=idx[j];
       let p=reg[c],L=p==null?null:p*q;const x=d[c];
       if(p!=null&&x&&x[3]>=t){
         const [mq,tot,,,club,cond]=x;
         if((!club||isMember(c))&&!cond){
           if(mq===1&&tot<p){p=tot;L=p*q}
           else if(mq>1){
-            multi[c]=`${mq} ב-${fmtNis(tot)}`;
-            if(q>=mq){const withDeal=Math.floor(q/mq)*tot+(q%mq)*p;if(withDeal<L){L=withDeal;multi[c]+=" ✓"}}
+            multi[j]=`${mq} ב-${fmtNis(tot)}`;
+            if(q>=mq){const withDeal=Math.floor(q/mq)*tot+(q%mq)*p;if(withDeal<L){L=withDeal;multi[j]+=" ✓"}}
           }
         }
       }
-      unit[c]=p;line[c]=L==null?null:Math.round(L*100)/100;
+      unit[j]=p;line[j]=L==null?null:Math.round(L*100)/100;
     }
     rows.push({i,q,unit,multi,line});
   }
@@ -963,7 +989,7 @@ function basket(){
     all:rows.reduce((s,r)=>s+(r.line[c]??0),0),
     have:rows.filter(r=>r.line[c]!=null).length}));
   const ranked=[...res].sort((a,b)=>common.length?a.common-b.common:(b.have-a.have)||(a.all-b.all));
-  return {rows,common,noPrice,ranked,chains};
+  return {rows,common,noPrice,ranked,chains,idx};
 }
 async function openCompare(){
   current={compare:true};openSheet();
@@ -997,6 +1023,14 @@ async function openCompare(){
           <div class="split-col"><b>ב${esc(ns)}</b><span>${sp.move.map(m=>`${esc(m.r.i.name)}${m.r.q>1?` ×${m.r.q}`:""} <em dir="ltr">−${fmtNis(m.d)} ₪</em>`).join(" · ")}</span></div>
           ${sp.only.length?`<p class="row-sub">רק ב${esc(ns)}: ${sp.only.map(r=>esc(r.i.name)).join(", ")}</p>`:""}</div>`
         :`<div class="split"><p class="split-sum">לא שווה לפצל: מעבר ל${esc(ns)} יחסוך רק ${fmtNis(sp.save)} ₪, פחות מהסף שקבעתם. הכי טוב לקנות הכל ב${esc(nb)}.</p></div>`;
+    }
+    const tips=pharmTips();
+    if(tips.length){
+      const tot=tips.reduce((s,x)=>s+x.save,0);
+      html+=`<h3 class="cmp-h">זול יותר בפארם <span>${tips.length} מוצרים · עד ${fmtNis(tot)} ₪</span></h3><div class="split ok">`+
+        tips.map(x=>`<div class="split-col"><b>${esc(x.i.name)}${x.q>1?` ×${x.q}`:""}</b><span>${x.L!=null
+          ?`ב${esc(x.chain)}: ${fmtNis(x.L)} ₪ במקום ${fmtNis(x.sMin)} ₪ ב${esc(x.sChain)} <em dir="ltr">−${fmtNis(x.save)} ₪</em>`
+          :`ב${esc(x.chain)}: ${x.mq} ב־${fmtNis(x.tot)} ₪. אם תקנו ${x.mq}, תחסכו כ־${fmtNis(x.save)} ₪ לעומת ${esc(x.sChain)}`}</span></div>`).join("")+`</div>`;
     }
     // comparison 2: only the items that every chain sells: an apples-to-apples total, however few they are
     const commonRank=[...B.ranked].sort((x,y)=>x.common-y.common),ct=commonRank[0],cw=commonRank[commonRank.length-1];
@@ -1195,7 +1229,7 @@ function priceCard(h){
 async function openPriceCheck(){
   current={pricecheck:true};openSheet();
   $("#sheet").innerHTML=`<h2>בדיקת מחיר ומבצעים</h2>
-    <p class="row-sub" style="margin:-4px 0 10px">חיפוש בכל המוצרים של 5 הסניפים שלך. אפשר לכתוב מותג, סוג ומידה, למשל "האגיס פרידום מידה 3".</p>
+    <p class="row-sub" style="margin:-4px 0 10px">חיפוש בכל המוצרים של ${(pricesData&&pricesData.chains.length)||9} הסניפים שלך (סופרים ופארם). אפשר לכתוב מותג, סוג ומידה, למשל "האגיס פרידום מידה 3".</p>
     <form class="search" id="pc-form" style="margin-bottom:10px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="pc-q" type="search" placeholder="מה מחפשים?" autocomplete="off" enterkeyhint="search"></form>
     <label class="btn pc-scan" for="pc-cam" id="pc-sheet-scan" role="button" tabindex="0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2"/><path d="M8 8v8M11 8v8M14 8v8M17 8v8"/></svg>סריקת ברקוד</label>
     <input type="file" class="cam-input" id="pc-cam" accept="image/*" capture="environment" tabindex="-1" aria-hidden="true">

@@ -43,6 +43,12 @@
 | 2 | ויקטורי | 7290696200003 | 026 | JSON: `laibcatalog.co.il/webapi/api/getfiles?edi=<chain>`, קובץ: `/webapi/<chain>/<fileName>` | — |
 | 3 | אושר עד | 7290103152017 | 031 (כפר סבא) | Cerberus | `osherad` |
 | 4 | יוחננוף | 7290803800003 | 024 (כפר סבא). לירושלים: 020 (תלפיות) | Cerberus | `yohananof` |
+| 5 | שופרסל דיל | 7290027600007 (תת-רשת 002) | 144 (רפפורט 6, כפר סבא) | `prices.shufersal.co.il/FileObject/UpdateCategory?catID=2` (מחירים) / `catID=4` (מבצעים) `&storeId=N`. מחזיר HTML עם קישורי Azure חתומים. **איטי: כ-70 שניות** | — |
+| 6 | Be (פארם) | 7290027600007 (תת-רשת 005) | 682 (כפר סבא צפון) | כמו שופרסל | — |
+| 7 | סופר-פארם (פארם) | 7290172900007 | 243 (שבזי, ראש העין) | `prices.super-pharm.co.il/?Category-equals=PriceFull&page=N` (20 בעמוד, אין סינון לפי סניף), `/Download/<file>` | — |
+| 8 | גוד פארם (פארם) | 7290058197699 | 251 (ויצמן 90, כפר סבא) | Bina: `POST MainIO_Hok.aspx {WStore, WDate:"", WFileType:4\|5}` → JSON, ואז `POST Download.aspx?FileNm=` → `SPath` | — |
+
+קבוצות (`GROUPS` ב-`build_data.py`, `groups` ב-`prices.json` v2): 0 = סופרים (0–5), 1 = פארם (6–8). `basket(g)` משווה סל בתוך קבוצה אחת. `pharmTips()` מציג מוצרים מהרשימה שזולים יותר בפארם, כולל מבצעי כמות. מדד הרשתות מחושב רק על הסופרים, ונבנה מחדש כשרשימת הרשתות משתנה. מבצעים עם `MinQty>24` הם זבל בנתונים (ברמי לוי יש למשל 5990) ומדולגים. `AdditionalIsCoupon=1` נחשב מבצע בתנאי.
 
 Cerberus: `GET /login` → csrftoken מתוך `<meta name="csrftoken">` → `POST /login/user` (username, password ריק, csrftoken) → `POST /file/json/dir` (sSearch=`PriceFull<chain>`, cd=`/`, csrftoken) → `GET /file/d/<fname>`.
 פורמט שמות: `PriceFull<chain>-[subchain-]<store>-YYYYMMDD-HHMMSS.gz`. משתמשים רק בקבצי `Full`.
@@ -58,7 +64,7 @@ Cerberus: `GET /login` → csrftoken מתוך `<meta name="csrftoken">` → `POS
 - חסימות: שרתי הרשתות לפעמים חוסמים כתובות IP מחוץ לישראל. מסביבת ענן של Claude הם חסומים לגמרי.
 
 ## מצב נוכחי (28.10.2026)
-- נתונים: 23.10.2026, כל 5 הרשתות מאותו יום.
+- נתונים: 5.11.2026, כל 9 הרשתות מאותו יום.
 - עיצוב (ענף `ui-redesign`): פלטת "ירוק שוק". כותרת בפס ירוק-טורקיז (`--hero: #0A9467`, `--hero-2: #13706B`), צבע פעולה `--stock: #08875D`, מבצעים בצהוב של תגית מדף (`--list: #FFD23F`), צבע עדין לכל קטגוריה (`CAT_COLOR`), גופן Fredoka לכותרות ו-Assistant לטקסט. יש מצב כהה. באייקונים אין קובץ מקור, ולכן הם נצבעו מחדש מה-PNG.
 - רשימת קניות: נגיעה מעבירה מוצר ל"עגלה" (`inCart`, מסונכרן), ו"סיימתי, למלאי" מעביר את כל העגלה למלאי.
 - בכותרת יש 3 מונים שמשתנים לפי הלשונית. בראש הרשימה מופיעה "תגית מדף" צהובה עם הרשת הזולה ביותר לסל (`cheapestChain()`, באותו סדר כמו בהשוואה). לשם כך `prices.json` (כ-1.3MB) נטען בכניסה ללשונית הרשימה. במצב כהה הכרטיסים מוגדרים בקו מתאר דק ולא בצל.
