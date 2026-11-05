@@ -373,6 +373,13 @@ header .theme-btn.icon{width:38px;justify-content:center;padding:0;position:rela
 .split.ok .row-sub{color:var(--list-ink);opacity:.8}
 .split-sum{margin:0;font-weight:600}
 .split-col{display:grid;gap:2px}.split-col span{line-height:1.5}.split-col em{font-style:normal;font-weight:700}
+.stock-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.stock-tile{display:flex;flex-direction:column;align-items:stretch;gap:6px;padding:10px 6px 8px;cursor:default}
+.stock-tile.empty{opacity:.72}
+.st-open{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;flex:1}
+.st-open:focus-visible{outline:2px solid var(--stock);outline-offset:2px;border-radius:10px}
+.stock-tile .chip{font-size:11px}
+.stepper.mini{align-self:center;transform:scale(.9);transform-origin:center}
 </style>
 </head>
 <body>
@@ -681,6 +688,7 @@ function addFromCatalog(k){
 }
 /* shopping-list layout: tiles or rows, remembered per device */
 let listView="tiles";try{listView=localStorage.getItem("pantry.listView")||"tiles"}catch(e){}
+let stockView="rows";try{stockView=localStorage.getItem("pantry.stockView")||"rows"}catch(e){}
 let cartOpen=true,justMoved=null;
 /* search: case/space/geresh-insensitive substring match */
 const norm=s=>String(s||"").toLowerCase().replace(/[׳'"״`]/g,"").replace(/\s+/g," ").trim();
@@ -737,7 +745,23 @@ function render(){
     const qn=norm($("#q").value);
     const shown=qn?stock.filter(i=>norm(i.name).includes(qn)):stock;
     if(!shown.length){v.innerHTML=`<div class="empty-state"><span class="big" aria-hidden="true">🔍</span><strong>לא נמצא</strong>אין במלאי מוצר שמתאים ל"${esc($("#q").value.trim())}".</div>`;return}
-    v.innerHTML=`<div class="rows">`+groupByCat(shown).map(([c,arr])=>catHead(c,arr.length)+arr.map(i=>`
+    const sTiles=`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>`;
+    const sRows=`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>`;
+    const sBar=`<div class="list-bar stock-bar"><span class="row-sub">${shown.length} מוצרים</span><div class="view-toggle" role="group" aria-label="תצוגת המלאי"><button data-sview="tiles" aria-pressed="${stockView==="tiles"}" aria-label="אריחים">${sTiles}</button><button data-sview="rows" aria-pressed="${stockView==="rows"}" aria-label="שורות">${sRows}</button></div></div>`;
+    if(stockView==="tiles"){
+      // one grid in category order: per-category grids leave half-empty rows when a category has 1–2 products
+      v.innerHTML=sBar+`<div class="tiles">`+groupByCat(shown).flatMap(([c,arr])=>arr).map(i=>`
+        <div class="tile-wrap" style="--c:${catColor(i.category)}"><div class="tile stock-tile ${i.qty<=0?"empty":""}">
+          <button class="st-open" data-edit="${i.id}" aria-label="פרטים: ${esc(i.name)}">
+            <span class="em">${showThumb(i)?`<img src="${i.thumb}" alt="">`:(CAT_ICON[i.category]||"🛒")}</span>
+            <span class="nm">${esc(i.name)}</span>
+            ${i.qty<=0?`<span class="chip out">אזל</span>`:i.onList?`<span class="chip">ברשימה</span>`:""}
+          </button>
+          <div class="stepper mini"><button data-dec="${i.id}" aria-label="פחות ${esc(i.name)}">−</button><output>${i.qty}</output><button data-inc="${i.id}" aria-label="עוד ${esc(i.name)}">+</button></div>
+        </div></div>`).join("")+`</div>`;
+      return;
+    }
+    v.innerHTML=sBar+`<div class="rows">`+groupByCat(shown).map(([c,arr])=>catHead(c,arr.length)+arr.map(i=>`
       <div class="row ${i.qty<=0?"empty":""}">
         ${thumbHtml(i)}
         <button class="row-main" data-edit="${i.id}"><span class="row-name">${esc(i.name)}</span>${i.qty<=0?`<span class="chip out">אזל</span>`:""}${i.onList?`<span class="chip">ברשימה</span>`:""}</button>
@@ -835,6 +859,7 @@ $("#view").addEventListener("click",e=>{
   if(d.inc){const i=items[d.inc];putItem({...i,qty:i.qty+1})}
   if(d.dec){const i=items[d.dec];if(i.qty<=0)return;const q=i.qty-1;putItem({...i,qty:q,onList:q===0?true:i.onList});if(q===0)toast(`${i.name} עבר לרשימת הקניות`)}
   if(d.edit) openEdit(items[d.edit]);
+  if(d.sview){stockView=d.sview;try{localStorage.setItem("pantry.stockView",stockView)}catch(e){}render();return}
   if(d.view){listView=d.view;try{localStorage.setItem("pantry.listView",listView)}catch(e){}render();return}
   if(d.addcat){addFromCatalog(d.addcat)}
   if(d.addlist){const i=items[d.addlist];if(i){putItem({...i,onList:true});toast(`${i.name} נוסף לרשימה`);$("#q").value="";render()}}
