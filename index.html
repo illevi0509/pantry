@@ -393,6 +393,10 @@ header .theme-btn.icon{width:38px;justify-content:center;padding:0;position:rela
 .rec-bar{height:6px;border-radius:6px;background:var(--line);overflow:hidden}.rec-bar i{display:block;height:100%;background:var(--stock)}
 .rec-body{padding:0 14px 14px}.rec-body h4{margin:8px 0 4px}.rec-body ul,.rec-body ol{margin:0 0 10px;padding-inline-start:20px;line-height:1.6}
 .set-row .pct{width:64px;display:inline-block;margin:0 4px;padding:4px 6px}
+.rec-cost{font-size:13px;font-weight:700;color:var(--ink)}
+.rec-cooked{color:var(--muted);font-style:italic}
+.rec-misslist{margin:0 0 10px;padding-inline-start:20px;color:var(--muted);font-size:14px}
+.rec-actions{display:flex;gap:8px;flex-wrap:wrap}.rec-actions .btn{flex:1;min-width:140px}
 </style>
 </head>
 <body>
@@ -947,6 +951,7 @@ function openSettings(){
     <div class="set-split"><input class="field" id="set-split" type="number" inputmode="decimal" min="0" step="1" value="${settings.split}" dir="ltr"><span>₪ ומעלה</span></div>
     <h3 class="cmp-h" style="margin-top:18px">מתכונים</h3>
     <div class="set-list">
+      <label class="set-row"><input type="checkbox" id="set-rec-on" ${settings.recipesOn!==false?"checked":""}><span>הצג את כפתור המתכונים בכותרת</span></label>
       <label class="set-row"><input type="radio" name="recmode" value="all" ${recSettings().mode==="all"?"checked":""}><span>רק מתכונים שכל המרכיבים שלהם בבית</span></label>
       <label class="set-row"><input type="radio" name="recmode" value="pct" ${recSettings().mode!=="all"?"checked":""}><span>גם מתכונים שיש בבית לפחות <input class="field pct" id="set-pct" type="number" min="10" max="100" step="5" value="${recSettings().pct}" dir="ltr">% מהמרכיבים</span></label>
     </div>
@@ -958,10 +963,11 @@ function openSettings(){
   $("#set-save").onclick=()=>{
     settings.clubs=chains.map((_,c)=>$(`[data-club="${c}"]`).checked);
     const v=parseFloat($("#set-split").value);settings.split=isFinite(v)&&v>=0?v:10;
+    settings.recipesOn=$("#set-rec-on").checked;
     settings.recMode=(document.querySelector('input[name="recmode"]:checked')||{}).value||"pct";
     const pc=parseFloat($("#set-pct").value);settings.recPct=isFinite(pc)?Math.min(100,Math.max(10,pc)):80;
     settings.staples=$("#set-staples").value.split(/[,،]/).map(x=>x.trim()).filter(Boolean);
-    saveSettings();closeSheet();render();toast("ההגדרות נשמרו");
+    saveSettings();closeSheet();render();if(typeof syncRecipesBtn==="function")syncRecipesBtn();toast("ההגדרות נשמרו");
   };
 }
 /* split: start from the chain with the most items (cheapest among those), then find ONE second chain where
@@ -1525,6 +1531,8 @@ function openEdit(it){
     <label for="e-cat">קטגוריה</label><select id="e-cat">${CATS.map(c=>`<option ${c===it.category?"selected":""}>${c}</option>`).join("")}</select>
     ${it.onList?`<label>כמה לקנות</label><div class="stepper buy big"><button type="button" id="e-bdec" aria-label="פחות">−</button><output id="e-bq">${bq(it)}</output><button type="button" id="e-binc" aria-label="עוד">+</button></div>`:""}
     ${it.onList&&dealsFor(it).length?`<label>מבצעים</label><div class="deals-box">${dealsFor(it).map(dealHtml).join("")}</div>`:""}
+    <label for="e-ing">מרכיב למתכונים</label><input class="field" id="e-ing" list="ing-list" value="${esc(it.ingredient==="-"?"":(it.ingredient||ingredientOf(it)||""))}" placeholder="לא משמש במתכונים"><datalist id="ing-list">${ING_LIST().map(g=>`<option value="${esc(g)}">`).join("")}</datalist>
+    <p class="row-sub" style="margin:-4px 0 8px">${it.ingredient?"נקבע ידנית":"זוהה אוטומטית"}. אפשר לתקן, או למחוק כדי שהמוצר לא ייספר במתכונים.</p>
     <label for="e-qty">כמות בבית</label><input class="field" id="e-qty" type="number" inputmode="numeric" min="0" value="${it.qty}">
     ${(it.barcodes||[]).length?`<p class="row-sub">ברקודים שמורים: <span class="code">${it.barcodes.map(esc).join(", ")}</span></p>`:""}
     <div class="actions">
@@ -1535,7 +1543,10 @@ function openEdit(it){
   $("#cancel").onclick=closeSheet;
   let ebq=bq(it);
   if($("#e-binc")){$("#e-binc").onclick=()=>{ebq++;$("#e-bq").textContent=ebq};$("#e-bdec").onclick=()=>{if(ebq>1)ebq--;$("#e-bq").textContent=ebq}}
-  const read=()=>({...it,name:$("#e-name").value.trim()||it.name,category:$("#e-cat").value,qty:Math.max(0,parseInt($("#e-qty").value)||0),...(it.onList?{buyQty:ebq}:{})});
+  const ingOf=()=>{const v=$("#e-ing").value.trim(),auto=ingredientOf({name:$("#e-name").value.trim()||it.name});
+    if(v===(auto||""))return {ingredient:null};return {ingredient:v||"-"}};   // only store it when it differs from the automatic guess
+  const read=()=>{const o={...it,name:$("#e-name").value.trim()||it.name,category:$("#e-cat").value,qty:Math.max(0,parseInt($("#e-qty").value)||0),...(it.onList?{buyQty:ebq}:{}),...ingOf()};
+    if(o.ingredient===null)delete o.ingredient;return o};
   $("#e-save").onclick=()=>{putItem(read());closeSheet()};
   $("#e-list").onclick=()=>{putItem({...read(),onList:!it.onList});closeSheet()};
   /* confirm() is silently blocked inside the artifact frame, so confirm with a second tap instead */
@@ -1583,65 +1594,68 @@ $("#price-btn").onclick=openPriceCheck;
    (i.ingredient, set by hand in the product sheet, wins). Kosher: every recipe is בשרי / חלבי / פרווה,
    meat is never mixed with dairy, and fish is never in a meat recipe. */
 const ING_RULES=[
-  [/חלב(?!ה)(?! סויה)|משקה חלב/,"חלב"],[/שמנת מתוקה/,"שמנת מתוקה"],[/שמנת חמוצה|שמנת 15|שמנת לבישול/,"שמנת"],
-  [/גבינה צהובה|עמק|גאודה|מוצרלה|פרמזן|צ'דר/,"גבינה צהובה"],[/קוטג/,"קוטג'"],[/גבינה לבנה|גבינת שמנת|נפוליאון/,"גבינה לבנה"],
-  [/בולגרית|פטה|צפתית/,"גבינה מלוחה"],[/חמאה/,"חמאה"],[/יוגורט|לבן/,"יוגורט"],[/ביצים|ביצה/,"ביצים"],
-  [/חזה עוף|שניצל|פילה עוף/,"חזה עוף"],[/כרעיים|שוקיים|ירכיים|עוף שלם/,"עוף"],[/בשר טחון|טחון/,"בשר טחון"],
-  [/נקניקיות|נקניק/,"נקניקיות"],[/סלמון|אמנון|דניס|לברק|פילה דג|בקלה|טונה/,"דג"],
-  [/פסטה|ספגטי|פנה|פוזילי|מקרוני/,"פסטה"],[/אורז/,"אורז"],[/פתיתים/,"פתיתים"],[/עדשים/,"עדשים"],[/חומוס יבש|גרגרי חומוס/,"גרגרי חומוס"],
-  [/קמח/,"קמח"],[/לחם|חלה|פיתה|לחמניה/,"לחם"],[/טורטיה/,"טורטיה"],[/בצק עלים/,"בצק עלים"],
-  [/רסק עגבניות/,"רסק עגבניות"],[/עגבניות מרוסקות|רוטב עגבניות|שימורי עגבניות/,"עגבניות מרוסקות"],[/עגבני/,"עגבניות"],
-  [/בצל/,"בצל"],[/שום/,"שום"],[/גזר/,"גזר"],[/תפוח אדמה|תפו"א/,"תפוחי אדמה"],[/בטטה/,"בטטה"],[/קישוא/,"קישואים"],
-  [/פלפל אדום|פלפל צהוב|פלפל ירוק|גמבה/,"פלפל"],[/חציל/,"חציל"],[/ברוקולי/,"ברוקולי"],[/כרובית/,"כרובית"],[/תרד/,"תרד"],
-  [/פטריות/,"פטריות"],[/תירס/,"תירס"],[/אפונה/,"אפונה"],[/שעועית/,"שעועית"],[/מלפפון/,"מלפפון"],[/חסה/,"חסה"],[/לימון/,"לימון"],
-  [/טחינה/,"טחינה"],[/רוטב סויה/,"רוטב סויה"],[/דבש/,"דבש"],[/שמן זית/,"שמן זית"],[/פירורי לחם/,"פירורי לחם"],
+  [/חלב קוקוס|קרם קוקוס/,"חלב קוקוס"],[/שוקולד|קקאו|ממרח שוקולד/,"שוקולד"],[/חמאת בוטנים/,null],
+  [/שמנת/,"שמנת"],[/גבינה צהובה|עמק|גאודה|מוצרלה|פרמזן|צ'דר|אמנטל/,"גבינה צהובה"],[/קוטג/,"קוטג'"],
+  [/גבינה לבנה|גבינת שמנת|נפוליאון|פילדלפיה/,"גבינה לבנה"],[/בולגרית|פטה|צפתית|גבינה מלוחה/,"גבינה מלוחה"],
+  [/חמאה/,"חמאה"],[/יוגורט|^לבן\b|^אשל|לבנה(?! מוקפצת)/,"יוגורט"],[/^חלב|משקה חלב|חלב (?:טרי|עמיד|מועשר|3%|1%)|(?<!שוקולד )חלב \d/,"חלב"],
+  [/ביצים|ביצה/,"ביצים"],[/עוף טחון|הודו טחון/,"עוף טחון"],[/פרגיות|פרגית/,"פרגיות"],[/חזה עוף|שניצל|פילה עוף|נתחי עוף/,"חזה עוף"],
+  [/כרעיים|שוקיים|ירכיים|עוף שלם|כנפיים|עוף טרי/,"עוף"],[/בשר טחון|בקר טחון/,"בשר טחון"],
+  [/צלי|גולאש|בשר בקר|אנטריקוט|כתף|שריר|בשר לבישול|אסאדו/,"בשר"],[/נקניקיות|נקניק/,"נקניקיות"],
+  [/טונה/,"טונה"],[/סלמון|אמנון|דניס|לברק|פילה דג|בקלה|מושט|דג /,"דג"],
+  [/דפי לזניה|לזניה/,"דפי לזניה"],[/פסטה|ספגטי|פנה|פוזילי|מקרוני|נודלס|אטריות/,"פסטה"],[/אורז/,"אורז"],[/פתיתים/,"פתיתים"],
+  [/קוסקוס/,"קוסקוס"],[/בורגול/,"בורגול"],[/קינואה/,"קינואה"],[/שיבולת שועל|קוואקר/,"שיבולת שועל"],
+  [/עדשים/,"עדשים"],[/גרגרי חומוס|חומוס יבש|חומוס גרגרים/,"גרגרי חומוס"],[/שעועית/,"שעועית"],[/אפונה/,"אפונה"],
+  [/שמרים/,"שמרים"],[/פירורי לחם|פירורי פנקו/,"פירורי לחם"],[/קמח/,"קמח"],[/ביסקוויט|פתי בר/,"ביסקוויטים"],
+  [/לחמני/,"לחמניות"],[/בצק עלים/,"בצק עלים"],[/לחם|חלה|פיתה|באגט/,"לחם"],
+  [/רסק עגבניות/,"רסק עגבניות"],[/עגבניות מרוסקות|רוטב עגבניות|עגבניות קלופות|שימורי עגבניות/,"עגבניות מרוסקות"],[/עגבני/,"עגבניות"],
+  [/בצל/,"בצל"],[/שום/,"שום"],[/גזר/,"גזר"],[/תפוח[יי]? אדמה|תפו"א/,"תפוחי אדמה"],[/בטטה/,"בטטה"],[/קישוא/,"קישואים"],
+  [/פלפל (?:אדום|צהוב|ירוק|כתום|חריף)|גמבה|פלפלים/,"פלפל"],[/חציל/,"חציל"],[/ברוקולי/,"ברוקולי"],[/כרובית/,"כרובית"],[/כרוב/,"כרוב"],
+  [/תרד/,"תרד"],[/פטריות|פטריה|שמפיניון/,"פטריות"],[/תירס/,"תירס"],[/מלפפון חמוץ|מלפפונים חמוצים/,"מלפפון חמוץ"],[/מלפפון/,"מלפפון"],
+  [/חסה/,"חסה"],[/לימון/,"לימון"],[/סלרי/,"סלרי"],[/דלעת/,"דלעת"],[/פטרוזיליה/,"פטרוזיליה"],
+  [/תפוח(?:י)? עץ|תפוחים|תפוח (?:גרני|פינק|סמית|זהוב|אדום)/,"תפוחים"],[/בננ/,"בננות"],
+  [/טחינה/,"טחינה"],[/רוטב סויה|סויה/,"רוטב סויה"],[/דבש/,"דבש"],[/מיונז/,"מיונז"],[/שמן זית/,"שמן זית"],
 ];
 const STAPLES_DEFAULT=["מלח","פלפל שחור","שמן","סוכר","תבלינים","מים"];
-function ingredientOf(i){if(i.ingredient)return i.ingredient;const n=i.name||"";for(const [re,v] of ING_RULES)if(re.test(n))return v;return null}
-const RECIPES=[
- {id:"shakshuka",name:"שקשוקה",kind:"פרווה",min:25,serves:3,main:["ביצים","עגבניות מרוסקות","בצל","פלפל","שום"],staple:["שמן","מלח","תבלינים"],
-  amounts:["6 ביצים","קופסת עגבניות מרוסקות (400 גרם)","בצל","פלפל אדום","3 שיני שום","פפריקה, כמון, מלח"],
-  steps:["מטגנים בצל ופלפל פרוסים בשמן עד שמתרככים.","מוסיפים שום ותבלינים, ואחריהם את העגבניות. מבשלים כ־10 דקות.","יוצרים גומות ושוברים לתוכן את הביצים.","מכסים ומבשלים על אש נמוכה 5–7 דקות, עד שהחלבון מתייצב."]},
- {id:"pasta-rose",name:"פסטה ברוטב רוזה",kind:"חלבי",min:20,serves:4,main:["פסטה","עגבניות מרוסקות","שמנת","שום","גבינה צהובה"],staple:["שמן","מלח"],
-  amounts:["500 גרם פסטה","קופסת עגבניות מרוסקות","מיכל שמנת לבישול","2 שיני שום","גבינה צהובה מגוררת"],
-  steps:["מבשלים את הפסטה לפי ההוראות.","מטגנים שום בשמן, מוסיפים עגבניות ומבשלים 5 דקות.","מוסיפים שמנת, מערבבים ומתבלים.","מערבבים עם הפסטה ומפזרים גבינה."]},
- {id:"schnitzel",name:"שניצל ביתי",kind:"בשרי",min:30,serves:4,main:["חזה עוף","ביצים","פירורי לחם","קמח"],staple:["שמן","מלח","תבלינים"],
-  amounts:["800 גרם חזה עוף פרוס","2 ביצים","כוס פירורי לחם","חצי כוס קמח"],
-  steps:["מתבלים את פרוסות העוף.","טובלים בקמח, אחר כך בביצה ואחר כך בפירורים.","מטגנים בשמן חם 3–4 דקות מכל צד."]},
- {id:"lentil-soup",name:"מרק עדשים כתומות",kind:"פרווה",min:35,serves:6,main:["עדשים","בצל","גזר","שום"],staple:["שמן","מלח","תבלינים","מים"],
-  amounts:["2 כוסות עדשים כתומות","בצל","2 גזרים","3 שיני שום","כמון, כורכום"],
-  steps:["מטגנים בצל, גזר ושום.","מוסיפים עדשים, תבלינים ו־8 כוסות מים.","מבשלים 25 דקות וטוחנים."]},
- {id:"chicken-rice",name:"עוף בתנור עם אורז",kind:"בשרי",min:75,serves:5,main:["עוף","אורז","בצל","שום"],staple:["שמן","מלח","תבלינים","מים"],
-  amounts:["1.5 ק\"ג כרעיים","2 כוסות אורז","בצל","ראש שום"],
-  steps:["מפזרים אורז ובצל בתבנית ומוסיפים 3 כוסות מים רותחים.","מניחים עליהם את העוף המתובל ואת השום.","מכסים ואופים שעה ב־180 מעלות, ואחר כך מגלים ל־15 דקות."]},
- {id:"salmon",name:"סלמון בתנור עם ירקות",kind:"פרווה",min:30,serves:4,main:["דג","לימון","שום","בטטה"],staple:["שמן זית","מלח","תבלינים"],
-  amounts:["4 נתחי סלמון","לימון","3 שיני שום","2 בטטות"],
-  steps:["חותכים בטטה לקוביות ואופים 15 דקות.","מוסיפים את הדג עם שום ולימון.","אופים עוד 12–15 דקות ב־200 מעלות."]},
- {id:"cheese-pashtida",name:"פשטידת גבינות",kind:"חלבי",min:50,serves:6,main:["ביצים","גבינה לבנה","קוטג'","גבינה צהובה","קמח"],staple:["מלח"],
-  amounts:["4 ביצים","גביע גבינה לבנה","גביע קוטג'","200 גרם גבינה צהובה","3 כפות קמח"],
-  steps:["מערבבים את כל המרכיבים.","שופכים לתבנית משומנת.","אופים 40 דקות ב־180 מעלות."]},
- {id:"bolognese",name:"פסטה בולונז",kind:"בשרי",min:35,serves:4,main:["פסטה","בשר טחון","עגבניות מרוסקות","בצל","שום"],staple:["שמן","מלח","תבלינים"],
-  amounts:["500 גרם פסטה","500 גרם בשר טחון","קופסת עגבניות מרוסקות","בצל","2 שיני שום"],
-  steps:["מטגנים בצל ושום, ומוסיפים את הבשר עד שמשחים.","מוסיפים עגבניות ומבשלים 20 דקות.","מגישים מעל הפסטה."]},
- {id:"veg-ptitim",name:"פתיתים עם ירקות",kind:"פרווה",min:25,serves:4,main:["פתיתים","בצל","גזר","קישואים"],staple:["שמן","מלח","מים"],
-  amounts:["2 כוסות פתיתים","בצל","גזר","קישוא"],
-  steps:["מטגנים בצל וירקות חתוכים.","מוסיפים פתיתים ומקלים 2 דקות.","מוסיפים 3 כוסות מים רותחים ומבשלים 10 דקות."]},
- {id:"omelette",name:"חביתת ירק",kind:"פרווה",min:10,serves:2,main:["ביצים","בצל"],staple:["שמן","מלח"],
-  amounts:["4 ביצים","בצל ירוק או בצל","פטרוזיליה (לא חובה)"],
-  steps:["טורפים ביצים עם בצל קצוץ ומלח.","מטגנים במחבת משומנת 2–3 דקות מכל צד."]},
-];
+function ingredientOf(i){if(i.ingredient)return i.ingredient==="-"?null:i.ingredient;const n=i.name||"";for(const [re,v] of ING_RULES)if(re.test(n))return v;return null}
+const ING_LIST=()=>[...new Set(ING_RULES.map(r=>r[1]).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"he"));
+let RECIPES=null,recipesP=null;
+function loadRecipes(){if(!recipesP)recipesP=fetch("recipes.json").then(r=>r.json()).then(j=>RECIPES=j).catch(()=>{recipesP=null;return null});return recipesP}
+/* "we cooked this": pushed down the list for a few days so the same dishes don't keep coming back */
+const COOKED_KEY="pantry.cooked.v1";
+let cooked={};try{cooked=JSON.parse(localStorage.getItem(COOKED_KEY)||"{}")}catch(e){}
+const daysAgo=iso=>Math.round((Date.now()-new Date(iso))/864e5);
+const recentlyCooked=id=>cooked[id]&&daysAgo(cooked[id])<5;
+/* rough cost of a missing ingredient: median shelf price of catalog products for it, at the cheapest supermarket */
+let ingCost=null;
+function buildIngCost(){
+  if(ingCost||!catIndex||!pricesData)return ingCost;
+  const sup=groupIdx(0),by={};
+  for(const c of catIndex){const g=ingredientOf({name:c.name});if(!g)continue;const pr=pricesData.prices[c.k];if(!pr)continue;
+    const v=sup.map(j=>pr[j]).filter(x=>x!=null);if(v.length<3)continue;(by[g]=by[g]||[]).push(sup.map(j=>pr[j]))}
+  ingCost={};
+  for(const [g,rows] of Object.entries(by)){let best=null;
+    sup.forEach((_,j)=>{const v=rows.map(r=>r[j]).filter(x=>x!=null).sort((a,b)=>a-b);if(v.length<3)return;const med=v[Math.floor(v.length/2)];
+      if(!best||med<best.p)best={p:med,chain:pricesData.chains[sup[j]]}});
+    if(best)ingCost[g]=best}
+  return ingCost;
+}
 const recSettings=()=>({mode:settings.recMode||"pct",pct:settings.recPct??80,staples:settings.staples||STAPLES_DEFAULT});
 function matchRecipes(){
+  if(!RECIPES)return [];
   const S=recSettings(),have=new Set(S.staples);
   for(const i of Object.values(items))if(i.qty>0){const g=ingredientOf(i);if(g)have.add(g)}
   return RECIPES.map(r=>{const got=r.main.filter(x=>have.has(x)),miss=r.main.filter(x=>!have.has(x)),stMiss=r.staple.filter(x=>!have.has(x));
     return {...r,got,miss,stMiss,pct:Math.round(got.length/r.main.length*100)}})
    .filter(r=>S.mode==="all"?r.miss.length===0:r.pct>=S.pct)
-   .sort((a,b)=>a.miss.length-b.miss.length||b.pct-a.pct);
+   .sort((a,b)=>(recentlyCooked(a.id)-recentlyCooked(b.id))||a.miss.length-b.miss.length||b.pct-a.pct);
 }
 let recKind="הכל";
-function openRecipes(){
+async function openRecipes(){
   current={recipes:true};openSheet();
+  if(!RECIPES){$("#sheet").innerHTML=`<div class="status"><span class="spin"></span><span>טוען מתכונים…</span></div>`;await loadRecipes();
+    if(!current||!current.recipes)return;if(!RECIPES){$("#sheet").innerHTML=`<p>לא הצלחתי לטעון את המתכונים. בדקו חיבור לאינטרנט.</p>`;return}}
+  // prices for "what the missing part costs": use them if already loaded, fetch in the background otherwise
+  if(!ingCost){if(catIndex&&pricesData)buildIngCost();else Promise.all([loadCatIndex(),loadPrices()]).then(()=>{buildIngCost();if(current&&current.recipes)openRecipes()})}
   const S=recSettings(),all=matchRecipes(),list=recKind==="הכל"?all:all.filter(r=>r.kind===recKind);
   const kinds=["הכל","בשרי","חלבי","פרווה"];
   const kindCls={"בשרי":"k-meat","חלבי":"k-dairy","פרווה":"k-parve"};
@@ -1650,18 +1664,25 @@ function openRecipes(){
     <div class="rec-kinds" role="group" aria-label="סוג מנה">${kinds.map(k=>`<button type="button" data-kind="${k}" aria-pressed="${recKind===k}">${k}</button>`).join("")}</div>
     ${list.length?list.map(r=>`<details class="rec">
       <summary><span class="rec-top"><b>${esc(r.name)}</b><span class="rec-kind ${kindCls[r.kind]}">${r.kind}</span></span>
-        <span class="rec-meta">${r.min} דק' · ${r.serves} מנות · ${r.miss.length?`חסר: ${r.miss.map(esc).join(", ")}`:"יש הכל בבית ✓"}</span>
+        <span class="rec-meta">${r.min>=120?Math.round(r.min/60)+" שעות":r.min+" דק'"} · ${r.serves} מנות · ${r.miss.length?`חסר: ${r.miss.map(esc).join(", ")}`:"יש הכל בבית ✓"}${recentlyCooked(r.id)?` · <span class="rec-cooked">בישלתם לפני ${daysAgo(cooked[r.id])||"פחות מ־1"} ימים</span>`:""}</span>
+        ${r.miss.length&&ingCost?(()=>{const known=r.miss.filter(g=>ingCost[g]);if(!known.length)return "";const sum=known.reduce((s,g)=>s+ingCost[g].p,0);
+          return `<span class="rec-cost">החסר יעלה בערך ${fmtNis(sum)} ₪${known.length<r.miss.length?" (לא כולל "+r.miss.filter(g=>!ingCost[g]).map(esc).join(", ")+")":""}</span>`})():""}
         <span class="rec-bar" aria-label="${r.pct}% מהמרכיבים בבית"><i style="width:${r.pct}%"></i></span></summary>
       <div class="rec-body">
         <h4>מרכיבים</h4><ul>${r.amounts.map(a=>`<li>${esc(a)}</li>`).join("")}</ul>
         <h4>אופן ההכנה</h4><ol>${r.steps.map(x=>`<li>${esc(x)}</li>`).join("")}</ol>
-        ${r.miss.length?`<button class="btn primary" type="button" data-recmiss="${r.id}">הוסף את החסר לרשימה (${r.miss.length})</button>`:""}
+        ${r.miss.length&&ingCost?`<ul class="rec-misslist">${r.miss.map(g=>`<li>${esc(g)}${ingCost[g]?` · כ־${fmtNis(ingCost[g].p)} ₪ ב${esc(ingCost[g].chain)}`:""}</li>`).join("")}</ul>`:""}
+        <div class="rec-actions">${r.miss.length?`<button class="btn primary" type="button" data-recmiss="${r.id}">הוסף את החסר לרשימה (${r.miss.length})</button>`:""}
+        <button class="btn" type="button" data-cooked="${r.id}">${recentlyCooked(r.id)?"✓ בישלנו":"בישלנו את זה"}</button></div>
       </div></details>`).join("")
     :`<div class="empty-state" style="box-shadow:none;background:var(--sunk)"><strong>אין מתכון שמתאים כרגע</strong>${S.mode==="all"?"נסו את ההגדרה \"לפחות 80% מהמרכיבים\", או הוסיפו מוצרים למלאי.":"הורידו את האחוז בהגדרות, או הוסיפו מוצרים למלאי."}</div>`}
     <div class="actions"><button class="btn" id="cancel" type="button">סגירה</button></div>`;
   $("#cancel").onclick=closeSheet;
   $("#rec-set").onclick=e=>{e.preventDefault();openSettings()};
   $("#sheet").querySelectorAll("[data-kind]").forEach(b=>b.onclick=()=>{recKind=b.dataset.kind;openRecipes()});
+  $("#sheet").querySelectorAll("[data-cooked]").forEach(b=>b.onclick=()=>{
+    const id=b.dataset.cooked;if(recentlyCooked(id))delete cooked[id];else cooked[id]=new Date().toISOString();
+    try{localStorage.setItem(COOKED_KEY,JSON.stringify(cooked))}catch(e){}toast(cooked[id]?"נרשם. המתכון יורד בסדר לכמה ימים":"בוטל");openRecipes()});
   $("#sheet").querySelectorAll("[data-recmiss]").forEach(b=>b.onclick=()=>{
     const r=all.find(x=>x.id===b.dataset.recmiss);if(!r)return;let n=0;
     for(const g of r.miss){const ex=Object.values(items).find(i=>ingredientOf(i)===g);
@@ -1670,6 +1691,7 @@ function openRecipes(){
   });
 }
 $("#recipes-btn").onclick=openRecipes;
+const syncRecipesBtn=()=>{$("#recipes-btn").hidden=settings.recipesOn===false};syncRecipesBtn();
 
 $("#theme-btn").onclick=()=>{const i=THEMES.findIndex(x=>x[0]===theme);theme=THEMES[(i+1)%THEMES.length][0];try{localStorage.setItem("pantry.theme",theme)}catch(e){}applyTheme()};
 applyTheme();
