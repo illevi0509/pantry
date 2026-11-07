@@ -395,7 +395,20 @@ header .theme-btn.icon{width:38px;justify-content:center;padding:0;position:rela
 .set-row .pct{width:64px;display:inline-block;margin:0 4px;padding:4px 6px}
 .rec-cost{font-size:13px;font-weight:700;color:var(--ink)}
 .rec-cooked{color:var(--muted);font-style:italic}
-.rec-misslist{margin:0 0 10px;padding-inline-start:20px;color:var(--muted);font-size:14px}
+.rec-ings{list-style:none;padding:0!important;margin:0 0 10px}
+.rec-ings li{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px dashed var(--line)}
+.rec-ings li:last-child{border-bottom:0}.rec-ings .ri-t{flex:1}
+.rec-ings li.miss .ri-t{color:#C81E1E;font-weight:700}
+.rec-ings .ri-p{display:block;font-size:12px;font-weight:600;color:var(--muted)}
+.ri-add{border:1.5px solid #C81E1E;color:#C81E1E;background:transparent;border-radius:999px;padding:3px 10px;font:inherit;font-size:13px;font-weight:700;white-space:nowrap}
+.ri-on{font-size:13px;color:var(--stock);font-weight:700;white-space:nowrap}
+.rec-miss{color:#C81E1E;font-weight:700}
+.rec-tabs{display:flex;background:var(--sunk);border-radius:12px;padding:3px;margin:0 0 10px}
+.rec-tabs button{flex:1;border:0;background:transparent;color:var(--ink);border-radius:10px;padding:8px;font:inherit;font-weight:700}
+.rec-tabs button[aria-pressed="true"]{background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+#rec-q{width:100%;margin:0 0 10px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .rec-ings li.miss .ri-t,:root:not([data-theme="light"]) .rec-miss{color:#FF8A80}:root:not([data-theme="light"]) .ri-add{color:#FF8A80;border-color:#FF8A80}}
+:root[data-theme="dark"] .rec-ings li.miss .ri-t,:root[data-theme="dark"] .rec-miss{color:#FF8A80}:root[data-theme="dark"] .ri-add{color:#FF8A80;border-color:#FF8A80}
 .rec-actions{display:flex;gap:8px;flex-wrap:wrap}.rec-actions .btn{flex:1;min-width:140px}
 </style>
 </head>
@@ -1640,55 +1653,91 @@ function buildIngCost(){
   return ingCost;
 }
 const recSettings=()=>({mode:settings.recMode||"pct",pct:settings.recPct??80,staples:settings.staples||STAPLES_DEFAULT});
-function matchRecipes(){
+function matchRecipes(showAll){
   if(!RECIPES)return [];
   const S=recSettings(),have=new Set(S.staples);
   for(const i of Object.values(items))if(i.qty>0){const g=ingredientOf(i);if(g)have.add(g)}
   return RECIPES.map(r=>{const got=r.main.filter(x=>have.has(x)),miss=r.main.filter(x=>!have.has(x)),stMiss=r.staple.filter(x=>!have.has(x));
     return {...r,got,miss,stMiss,pct:Math.round(got.length/r.main.length*100)}})
-   .filter(r=>S.mode==="all"?r.miss.length===0:r.pct>=S.pct)
+   .filter(r=>showAll||(S.mode==="all"?r.miss.length===0:r.pct>=S.pct))
    .sort((a,b)=>(recentlyCooked(a.id)-recentlyCooked(b.id))||a.miss.length-b.miss.length||b.pct-a.pct);
 }
-let recKind="הכל";
+let recKind="הכל",recView="fit",recQ="";
+/* which main ingredient each amount line is about (for painting missing ones red) */
+const ING_ALIAS={"עוף":["כרעיים","שוקיים","כנפיים","חזה עוף","פרגיות","עוף"],"דג":["סלמון","אמנון","דניס","מושט","בקלה","פילה","דג"],
+  "בשר":["צלי","בקר","אנטריקוט","כתף","בשר"],"שוקולד":["שוקולד","קקאו"],"פסטה":["פסטה","מקרוני","ספגטי","פנה"],"גבינה מלוחה":["בולגרית","פטה","גבינה מלוחה"]};
+function ingKeys(g){if(ING_ALIAS[g])return ING_ALIAS[g];const k=new Set([g]);for(const w of g.split(" "))if(w.length>=3){k.add(w);if(w.length>=5)k.add(w.slice(0,w.length-1));k.add(w.replace(/(ים|ות|ה)$/,""))}
+  return [...k].filter(x=>x.length>=3||x===g)}
+function recLines(r){
+  if(r._lines)return r._lines;
+  const lines=r.amounts.map(t=>{let best=null,bl=0;for(const g of r.main)for(const k of ingKeys(g))if(t.includes(k)&&k.length>bl){best=g;bl=k.length}return {t,g:best}});
+  const used=new Set(lines.map(l=>l.g));for(const g of r.main)if(!used.has(g))lines.push({t:g,g});
+  return r._lines=lines;
+}
+function onListFor(g){return Object.values(items).some(i=>i.onList&&ingredientOf(i)===g)}
+function addIngToList(g){const ex=Object.values(items).find(i=>ingredientOf(i)===g);
+  if(ex){if(ex.onList)return false;putItem({...ex,onList:true});return true}
+  putItem({id:newId(),name:g,category:"אחר",qty:0,onList:true,barcodes:[],ingredient:g});return true}
+function recCard(r,kindCls){
+  const miss=new Set(r.miss);
+  const cost=r.miss.length&&ingCost?(()=>{const known=r.miss.filter(g=>ingCost[g]);if(!known.length)return "";const sum=known.reduce((s,g)=>s+ingCost[g].p,0);
+    return `<span class="rec-cost">החסר יעלה בערך ${fmtNis(sum)} ₪${known.length<r.miss.length?" (לא כולל "+r.miss.filter(g=>!ingCost[g]).map(esc).join(", ")+")":""}</span>`})():"";
+  return `<details class="rec" data-rid="${esc(r.id)}">
+    <summary><span class="rec-top"><b>${esc(r.name)}</b><span class="rec-kind ${kindCls[r.kind]}">${r.kind}</span></span>
+      <span class="rec-meta">${r.min>=120?Math.round(r.min/60)+" שעות":r.min+" דק'"} · ${r.serves} מנות · ${r.miss.length?`<span class="rec-miss">חסר: ${r.miss.map(esc).join(", ")}</span>`:"יש הכל בבית ✓"}${recentlyCooked(r.id)?` · <span class="rec-cooked">בישלתם לפני ${daysAgo(cooked[r.id])||"פחות מ־1"} ימים</span>`:""}</span>
+      ${cost}
+      <span class="rec-bar" aria-label="${r.pct}% מהמרכיבים בבית"><i style="width:${r.pct}%"></i></span></summary>
+    <div class="rec-body">
+      <h4>מרכיבים</h4><ul class="rec-ings">${recLines(r).map(l=>{const m=l.g&&miss.has(l.g);
+        if(!m)return `<li><span class="ri-t">${esc(l.t)}</span></li>`;
+        const pr=ingCost&&ingCost[l.g]?`<span class="ri-p">חסר · כ־${fmtNis(ingCost[l.g].p)} ₪ ב${esc(ingCost[l.g].chain)}</span>`:`<span class="ri-p">חסר בבית</span>`;
+        return `<li class="miss"><span class="ri-t">${esc(l.t)}${pr}</span>${onListFor(l.g)?`<span class="ri-on">✓ ברשימה</span>`:`<button class="ri-add" type="button" data-addone="${esc(l.g)}">+ לרשימה</button>`}</li>`}).join("")}</ul>
+      <h4>אופן ההכנה</h4><ol>${r.steps.map(x=>`<li>${esc(x)}</li>`).join("")}</ol>
+      <div class="rec-actions">${r.miss.length>1?`<button class="btn primary" type="button" data-recmiss="${esc(r.id)}">הוסף את כל החסר לרשימה (${r.miss.length})</button>`:""}
+      <button class="btn" type="button" data-cooked="${esc(r.id)}">${recentlyCooked(r.id)?"✓ בישלנו":"בישלנו את זה"}</button></div>
+    </div></details>`;
+}
 async function openRecipes(){
   current={recipes:true};openSheet();
   if(!RECIPES){$("#sheet").innerHTML=`<div class="status"><span class="spin"></span><span>טוען מתכונים…</span></div>`;await loadRecipes();
     if(!current||!current.recipes)return;if(!RECIPES){$("#sheet").innerHTML=`<p>לא הצלחתי לטעון את המתכונים. בדקו חיבור לאינטרנט.</p>`;return}}
   // prices for "what the missing part costs": use them if already loaded, fetch in the background otherwise
-  if(!ingCost){if(catIndex&&pricesData)buildIngCost();else Promise.all([loadCatIndex(),loadPrices()]).then(()=>{buildIngCost();if(current&&current.recipes)openRecipes()})}
-  const S=recSettings(),all=matchRecipes(),list=recKind==="הכל"?all:all.filter(r=>r.kind===recKind);
+  if(!ingCost){if(catIndex&&pricesData)buildIngCost();else Promise.all([loadCatIndex(),loadPrices()]).then(()=>{buildIngCost();if(current&&current.recipes)drawRecList()})}
+  const S=recSettings(),fitN=matchRecipes(false).length;
   const kinds=["הכל","בשרי","חלבי","פרווה"];
-  const kindCls={"בשרי":"k-meat","חלבי":"k-dairy","פרווה":"k-parve"};
   $("#sheet").innerHTML=`<h2>מה מבשלים היום?</h2>
-    <p class="row-sub" style="margin:-4px 0 10px">${S.mode==="all"?"רק מתכונים שכל המרכיבים שלהם בבית":`מתכונים שיש בבית לפחות ${S.pct}% מהמרכיבים העיקריים שלהם`} · <a href="#" id="rec-set">שינוי</a></p>
+    <div class="rec-tabs" role="group" aria-label="תצוגה"><button type="button" data-view="fit" aria-pressed="${recView==="fit"}">מה שאפשר להכין (${fitN})</button><button type="button" data-view="all" aria-pressed="${recView==="all"}">כל המתכונים (${RECIPES.length})</button></div>
+    <p class="row-sub" style="margin:-2px 0 10px">${recView==="all"?"כל המתכונים, גם אם אין כלום בבית. המרכיבים החסרים מסומנים באדום.":S.mode==="all"?"רק מתכונים שכל המרכיבים שלהם בבית":`מתכונים שיש בבית לפחות ${S.pct}% מהמרכיבים העיקריים שלהם`} · <a href="#" id="rec-set">הגדרות</a></p>
+    <input class="field" id="rec-q" type="search" placeholder="חיפוש מתכון או מרכיב (למשל: עוף, פשטידה)" value="${esc(recQ)}">
     <div class="rec-kinds" role="group" aria-label="סוג מנה">${kinds.map(k=>`<button type="button" data-kind="${k}" aria-pressed="${recKind===k}">${k}</button>`).join("")}</div>
-    ${list.length?list.map(r=>`<details class="rec">
-      <summary><span class="rec-top"><b>${esc(r.name)}</b><span class="rec-kind ${kindCls[r.kind]}">${r.kind}</span></span>
-        <span class="rec-meta">${r.min>=120?Math.round(r.min/60)+" שעות":r.min+" דק'"} · ${r.serves} מנות · ${r.miss.length?`חסר: ${r.miss.map(esc).join(", ")}`:"יש הכל בבית ✓"}${recentlyCooked(r.id)?` · <span class="rec-cooked">בישלתם לפני ${daysAgo(cooked[r.id])||"פחות מ־1"} ימים</span>`:""}</span>
-        ${r.miss.length&&ingCost?(()=>{const known=r.miss.filter(g=>ingCost[g]);if(!known.length)return "";const sum=known.reduce((s,g)=>s+ingCost[g].p,0);
-          return `<span class="rec-cost">החסר יעלה בערך ${fmtNis(sum)} ₪${known.length<r.miss.length?" (לא כולל "+r.miss.filter(g=>!ingCost[g]).map(esc).join(", ")+")":""}</span>`})():""}
-        <span class="rec-bar" aria-label="${r.pct}% מהמרכיבים בבית"><i style="width:${r.pct}%"></i></span></summary>
-      <div class="rec-body">
-        <h4>מרכיבים</h4><ul>${r.amounts.map(a=>`<li>${esc(a)}</li>`).join("")}</ul>
-        <h4>אופן ההכנה</h4><ol>${r.steps.map(x=>`<li>${esc(x)}</li>`).join("")}</ol>
-        ${r.miss.length&&ingCost?`<ul class="rec-misslist">${r.miss.map(g=>`<li>${esc(g)}${ingCost[g]?` · כ־${fmtNis(ingCost[g].p)} ₪ ב${esc(ingCost[g].chain)}`:""}</li>`).join("")}</ul>`:""}
-        <div class="rec-actions">${r.miss.length?`<button class="btn primary" type="button" data-recmiss="${r.id}">הוסף את החסר לרשימה (${r.miss.length})</button>`:""}
-        <button class="btn" type="button" data-cooked="${r.id}">${recentlyCooked(r.id)?"✓ בישלנו":"בישלנו את זה"}</button></div>
-      </div></details>`).join("")
-    :`<div class="empty-state" style="box-shadow:none;background:var(--sunk)"><strong>אין מתכון שמתאים כרגע</strong>${S.mode==="all"?"נסו את ההגדרה \"לפחות 80% מהמרכיבים\", או הוסיפו מוצרים למלאי.":"הורידו את האחוז בהגדרות, או הוסיפו מוצרים למלאי."}</div>`}
+    <div id="rec-list"></div>
     <div class="actions"><button class="btn" id="cancel" type="button">סגירה</button></div>`;
   $("#cancel").onclick=closeSheet;
   $("#rec-set").onclick=e=>{e.preventDefault();openSettings()};
-  $("#sheet").querySelectorAll("[data-kind]").forEach(b=>b.onclick=()=>{recKind=b.dataset.kind;openRecipes()});
-  $("#sheet").querySelectorAll("[data-cooked]").forEach(b=>b.onclick=()=>{
-    const id=b.dataset.cooked;if(recentlyCooked(id))delete cooked[id];else cooked[id]=new Date().toISOString();
-    try{localStorage.setItem(COOKED_KEY,JSON.stringify(cooked))}catch(e){}toast(cooked[id]?"נרשם. המתכון יורד בסדר לכמה ימים":"בוטל");openRecipes()});
-  $("#sheet").querySelectorAll("[data-recmiss]").forEach(b=>b.onclick=()=>{
-    const r=all.find(x=>x.id===b.dataset.recmiss);if(!r)return;let n=0;
-    for(const g of r.miss){const ex=Object.values(items).find(i=>ingredientOf(i)===g);
-      if(ex){if(!ex.onList){putItem({...ex,onList:true});n++}}else{putItem({id:newId(),name:g,category:"אחר",qty:0,onList:true,barcodes:[],ingredient:g});n++}}
-    toast(n?`${n} מוצרים נוספו לרשימה`:"הכל כבר ברשימה");b.disabled=true;
-  });
+  $("#sheet").querySelectorAll("[data-kind]").forEach(b=>b.onclick=()=>{recKind=b.dataset.kind;$("#sheet").querySelectorAll("[data-kind]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawRecList()});
+  $("#sheet").querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{recView=b.dataset.view;openRecipes()});
+  $("#rec-q").oninput=e=>{recQ=e.target.value;drawRecList()};
+  const L=$("#rec-list");
+  L.onclick=e=>{
+    const one=e.target.closest("[data-addone]"),ck=e.target.closest("[data-cooked]"),all=e.target.closest("[data-recmiss]");
+    if(one){const g=one.dataset.addone;addIngToList(g);toast(`${g} נוסף לרשימה`);redrawCard(one.closest(".rec"));return}
+    if(ck){const id=ck.dataset.cooked;if(recentlyCooked(id))delete cooked[id];else cooked[id]=new Date().toISOString();
+      try{localStorage.setItem(COOKED_KEY,JSON.stringify(cooked))}catch(e){}toast(cooked[id]?"נרשם. המתכון יורד בסדר לכמה ימים":"בוטל");redrawCard(ck.closest(".rec"));return}
+    if(all){const r=matchRecipes(true).find(x=>x.id===all.dataset.recmiss);if(!r)return;let n=0;for(const g of r.miss)if(addIngToList(g))n++;
+      toast(n?`${n} מוצרים נוספו לרשימה`:"הכל כבר ברשימה");redrawCard(all.closest(".rec"))}
+  };
+  drawRecList();
+}
+function redrawCard(el){if(!el)return;const r=matchRecipes(true).find(x=>x.id===el.dataset.rid);if(!r)return;
+  const w=document.createElement("div");w.innerHTML=recCard(r,{"בשרי":"k-meat","חלבי":"k-dairy","פרווה":"k-parve"});const n=w.firstElementChild;n.open=el.open;el.replaceWith(n)}
+function drawRecList(){
+  const L=$("#rec-list");if(!L)return;const S=recSettings();
+  const norm=t=>t.replace(/[׳'"״]/g,"");const q=norm(recQ.trim());
+  let list=matchRecipes(recView==="all");if(recKind!=="הכל")list=list.filter(r=>r.kind===recKind);
+  if(q)list=list.filter(r=>norm([r.name,...r.main,...r.amounts].join(" ")).includes(q));
+  const kindCls={"בשרי":"k-meat","חלבי":"k-dairy","פרווה":"k-parve"};
+  L.innerHTML=list.length?list.map(r=>recCard(r,kindCls)).join("")
+    :`<div class="empty-state" style="box-shadow:none;background:var(--sunk)"><strong>${q?"לא נמצא מתכון":"אין מתכון שמתאים כרגע"}</strong>${q?(recView==="fit"?"נסו לחפש ב\"כל המתכונים\".":"נסו מילה אחרת."):S.mode==="all"?"נסו את \"כל המתכונים\", או את ההגדרה \"לפחות 80% מהמרכיבים\".":"נסו את \"כל המתכונים\", או הורידו את האחוז בהגדרות."}</div>`;
 }
 $("#recipes-btn").onclick=openRecipes;
 const syncRecipesBtn=()=>{$("#recipes-btn").hidden=settings.recipesOn===false};syncRecipesBtn();
