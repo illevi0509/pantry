@@ -380,13 +380,26 @@ header .theme-btn.icon{width:38px;justify-content:center;padding:0;position:rela
 .st-open:focus-visible{outline:2px solid var(--stock);outline-offset:2px;border-radius:10px}
 .stock-tile .chip{font-size:11px}
 .stepper.mini{align-self:center;transform:scale(.9);transform-origin:center}
+.rec-kinds{display:flex;gap:6px;margin:0 0 12px;flex-wrap:wrap}
+.rec-kinds button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 14px;font:inherit;font-weight:600}
+.rec-kinds button[aria-pressed="true"]{background:var(--stock);border-color:var(--stock);color:var(--stock-ink)}
+.rec{background:var(--sunk);border-radius:14px;margin-bottom:10px;overflow:hidden}
+.rec summary{list-style:none;cursor:pointer;padding:12px 14px;display:grid;gap:6px}
+.rec summary::-webkit-details-marker{display:none}
+.rec-top{display:flex;align-items:center;justify-content:space-between;gap:8px}.rec-top b{font-size:17px}
+.rec-kind{font-size:12px;font-weight:700;border-radius:999px;padding:2px 10px}
+.k-meat{background:#FDE2E1;color:#9B1C1C}.k-dairy{background:#DCEBFF;color:#1849A9}.k-parve{background:#DDF3E6;color:#0B6B43}
+.rec-meta{color:var(--muted);font-size:14px}
+.rec-bar{height:6px;border-radius:6px;background:var(--line);overflow:hidden}.rec-bar i{display:block;height:100%;background:var(--stock)}
+.rec-body{padding:0 14px 14px}.rec-body h4{margin:8px 0 4px}.rec-body ul,.rec-body ol{margin:0 0 10px;padding-inline-start:20px;line-height:1.6}
+.set-row .pct{width:64px;display:inline-block;margin:0 4px;padding:4px 6px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <h1>המזווה 🧺</h1>
-    <div class="hdr-btns"><button class="theme-btn" id="settings-btn" type="button" aria-label="הגדרות"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button><button class="theme-btn" id="price-btn" type="button" aria-label="בדיקת מחיר ומבצעים"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>בדיקת מחיר</button><button class="theme-btn icon" id="sync-btn" type="button" aria-label="סנכרון ושיתוף"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 20v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V20"/><circle cx="9" cy="7.5" r="3.5"/><path d="M22 20v-1.5a4 4 0 0 0-3-3.9M16 4.1a3.5 3.5 0 0 1 0 6.8"/></svg></button><button class="theme-btn" id="theme-btn" type="button"></button></div>
+    <div class="hdr-btns"><button class="theme-btn" id="recipes-btn" type="button" aria-label="מתכונים ממה שיש בבית"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 13.9A4 4 0 0 1 7.5 6.1a5 5 0 0 1 9 0A4 4 0 0 1 18 13.9V20H6z"/><path d="M6 17h12"/></svg></button><button class="theme-btn" id="settings-btn" type="button" aria-label="הגדרות"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button><button class="theme-btn" id="price-btn" type="button" aria-label="בדיקת מחיר ומבצעים"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>בדיקת מחיר</button><button class="theme-btn icon" id="sync-btn" type="button" aria-label="סנכרון ושיתוף"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 20v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V20"/><circle cx="9" cy="7.5" r="3.5"/><path d="M22 20v-1.5a4 4 0 0 0-3-3.9M16 4.1a3.5 3.5 0 0 1 0 6.8"/></svg></button><button class="theme-btn" id="theme-btn" type="button"></button></div>
     <div class="summary" id="summary">טוען…</div>
   </header>
   <form class="search" id="search-wrap" hidden>
@@ -932,12 +945,22 @@ function openSettings(){
     <h3 class="cmp-h" style="margin-top:18px">פיצול קנייה בין שתי רשתות</h3>
     <p class="row-sub" style="margin:0 0 8px">ההשוואה תציע לקנות חלק מהמוצרים ברשת שנייה רק אם החיסכון הכולל גדול מהסכום הזה.</p>
     <div class="set-split"><input class="field" id="set-split" type="number" inputmode="decimal" min="0" step="1" value="${settings.split}" dir="ltr"><span>₪ ומעלה</span></div>
+    <h3 class="cmp-h" style="margin-top:18px">מתכונים</h3>
+    <div class="set-list">
+      <label class="set-row"><input type="radio" name="recmode" value="all" ${recSettings().mode==="all"?"checked":""}><span>רק מתכונים שכל המרכיבים שלהם בבית</span></label>
+      <label class="set-row"><input type="radio" name="recmode" value="pct" ${recSettings().mode!=="all"?"checked":""}><span>גם מתכונים שיש בבית לפחות <input class="field pct" id="set-pct" type="number" min="10" max="100" step="5" value="${recSettings().pct}" dir="ltr">% מהמרכיבים</span></label>
+    </div>
+    <p class="row-sub" style="margin:8px 0 6px">יש תמיד בבית (לא נספרים כחסרים):</p>
+    <input class="field" id="set-staples" value="${esc(recSettings().staples.join(", "))}" style="width:100%">
     <p class="row-sub" style="margin-top:14px">ההגדרות נשמרות בטלפון הזה בלבד.</p>
     <div class="actions"><button class="btn primary" id="set-save" type="button">שמירה</button><button class="btn" id="cancel" type="button">ביטול</button></div>`;
   $("#cancel").onclick=closeSheet;
   $("#set-save").onclick=()=>{
     settings.clubs=chains.map((_,c)=>$(`[data-club="${c}"]`).checked);
     const v=parseFloat($("#set-split").value);settings.split=isFinite(v)&&v>=0?v:10;
+    settings.recMode=(document.querySelector('input[name="recmode"]:checked')||{}).value||"pct";
+    const pc=parseFloat($("#set-pct").value);settings.recPct=isFinite(pc)?Math.min(100,Math.max(10,pc)):80;
+    settings.staples=$("#set-staples").value.split(/[,،]/).map(x=>x.trim()).filter(Boolean);
     saveSettings();closeSheet();render();toast("ההגדרות נשמרו");
   };
 }
@@ -1554,6 +1577,100 @@ function applyTheme(){
   $("#theme-btn").innerHTML=t[1];$("#theme-btn").classList.add("icon");$("#theme-btn").setAttribute("aria-label","מצב תצוגה: "+({auto:"אוטומטי",light:"בהיר",dark:"כהה"})[theme]+". לחץ להחלפה");
 }
 $("#price-btn").onclick=openPriceCheck;
+
+/* ---------- recipes from what is at home ----------
+   Each pantry product keeps its own name; ingredientOf() maps it to a base ingredient behind the scenes
+   (i.ingredient, set by hand in the product sheet, wins). Kosher: every recipe is בשרי / חלבי / פרווה,
+   meat is never mixed with dairy, and fish is never in a meat recipe. */
+const ING_RULES=[
+  [/חלב(?!ה)(?! סויה)|משקה חלב/,"חלב"],[/שמנת מתוקה/,"שמנת מתוקה"],[/שמנת חמוצה|שמנת 15|שמנת לבישול/,"שמנת"],
+  [/גבינה צהובה|עמק|גאודה|מוצרלה|פרמזן|צ'דר/,"גבינה צהובה"],[/קוטג/,"קוטג'"],[/גבינה לבנה|גבינת שמנת|נפוליאון/,"גבינה לבנה"],
+  [/בולגרית|פטה|צפתית/,"גבינה מלוחה"],[/חמאה/,"חמאה"],[/יוגורט|לבן/,"יוגורט"],[/ביצים|ביצה/,"ביצים"],
+  [/חזה עוף|שניצל|פילה עוף/,"חזה עוף"],[/כרעיים|שוקיים|ירכיים|עוף שלם/,"עוף"],[/בשר טחון|טחון/,"בשר טחון"],
+  [/נקניקיות|נקניק/,"נקניקיות"],[/סלמון|אמנון|דניס|לברק|פילה דג|בקלה|טונה/,"דג"],
+  [/פסטה|ספגטי|פנה|פוזילי|מקרוני/,"פסטה"],[/אורז/,"אורז"],[/פתיתים/,"פתיתים"],[/עדשים/,"עדשים"],[/חומוס יבש|גרגרי חומוס/,"גרגרי חומוס"],
+  [/קמח/,"קמח"],[/לחם|חלה|פיתה|לחמניה/,"לחם"],[/טורטיה/,"טורטיה"],[/בצק עלים/,"בצק עלים"],
+  [/רסק עגבניות/,"רסק עגבניות"],[/עגבניות מרוסקות|רוטב עגבניות|שימורי עגבניות/,"עגבניות מרוסקות"],[/עגבני/,"עגבניות"],
+  [/בצל/,"בצל"],[/שום/,"שום"],[/גזר/,"גזר"],[/תפוח אדמה|תפו"א/,"תפוחי אדמה"],[/בטטה/,"בטטה"],[/קישוא/,"קישואים"],
+  [/פלפל אדום|פלפל צהוב|פלפל ירוק|גמבה/,"פלפל"],[/חציל/,"חציל"],[/ברוקולי/,"ברוקולי"],[/כרובית/,"כרובית"],[/תרד/,"תרד"],
+  [/פטריות/,"פטריות"],[/תירס/,"תירס"],[/אפונה/,"אפונה"],[/שעועית/,"שעועית"],[/מלפפון/,"מלפפון"],[/חסה/,"חסה"],[/לימון/,"לימון"],
+  [/טחינה/,"טחינה"],[/רוטב סויה/,"רוטב סויה"],[/דבש/,"דבש"],[/שמן זית/,"שמן זית"],[/פירורי לחם/,"פירורי לחם"],
+];
+const STAPLES_DEFAULT=["מלח","פלפל שחור","שמן","סוכר","תבלינים","מים"];
+function ingredientOf(i){if(i.ingredient)return i.ingredient;const n=i.name||"";for(const [re,v] of ING_RULES)if(re.test(n))return v;return null}
+const RECIPES=[
+ {id:"shakshuka",name:"שקשוקה",kind:"פרווה",min:25,serves:3,main:["ביצים","עגבניות מרוסקות","בצל","פלפל","שום"],staple:["שמן","מלח","תבלינים"],
+  amounts:["6 ביצים","קופסת עגבניות מרוסקות (400 גרם)","בצל","פלפל אדום","3 שיני שום","פפריקה, כמון, מלח"],
+  steps:["מטגנים בצל ופלפל פרוסים בשמן עד שמתרככים.","מוסיפים שום ותבלינים, ואחריהם את העגבניות. מבשלים כ־10 דקות.","יוצרים גומות ושוברים לתוכן את הביצים.","מכסים ומבשלים על אש נמוכה 5–7 דקות, עד שהחלבון מתייצב."]},
+ {id:"pasta-rose",name:"פסטה ברוטב רוזה",kind:"חלבי",min:20,serves:4,main:["פסטה","עגבניות מרוסקות","שמנת","שום","גבינה צהובה"],staple:["שמן","מלח"],
+  amounts:["500 גרם פסטה","קופסת עגבניות מרוסקות","מיכל שמנת לבישול","2 שיני שום","גבינה צהובה מגוררת"],
+  steps:["מבשלים את הפסטה לפי ההוראות.","מטגנים שום בשמן, מוסיפים עגבניות ומבשלים 5 דקות.","מוסיפים שמנת, מערבבים ומתבלים.","מערבבים עם הפסטה ומפזרים גבינה."]},
+ {id:"schnitzel",name:"שניצל ביתי",kind:"בשרי",min:30,serves:4,main:["חזה עוף","ביצים","פירורי לחם","קמח"],staple:["שמן","מלח","תבלינים"],
+  amounts:["800 גרם חזה עוף פרוס","2 ביצים","כוס פירורי לחם","חצי כוס קמח"],
+  steps:["מתבלים את פרוסות העוף.","טובלים בקמח, אחר כך בביצה ואחר כך בפירורים.","מטגנים בשמן חם 3–4 דקות מכל צד."]},
+ {id:"lentil-soup",name:"מרק עדשים כתומות",kind:"פרווה",min:35,serves:6,main:["עדשים","בצל","גזר","שום"],staple:["שמן","מלח","תבלינים","מים"],
+  amounts:["2 כוסות עדשים כתומות","בצל","2 גזרים","3 שיני שום","כמון, כורכום"],
+  steps:["מטגנים בצל, גזר ושום.","מוסיפים עדשים, תבלינים ו־8 כוסות מים.","מבשלים 25 דקות וטוחנים."]},
+ {id:"chicken-rice",name:"עוף בתנור עם אורז",kind:"בשרי",min:75,serves:5,main:["עוף","אורז","בצל","שום"],staple:["שמן","מלח","תבלינים","מים"],
+  amounts:["1.5 ק\"ג כרעיים","2 כוסות אורז","בצל","ראש שום"],
+  steps:["מפזרים אורז ובצל בתבנית ומוסיפים 3 כוסות מים רותחים.","מניחים עליהם את העוף המתובל ואת השום.","מכסים ואופים שעה ב־180 מעלות, ואחר כך מגלים ל־15 דקות."]},
+ {id:"salmon",name:"סלמון בתנור עם ירקות",kind:"פרווה",min:30,serves:4,main:["דג","לימון","שום","בטטה"],staple:["שמן זית","מלח","תבלינים"],
+  amounts:["4 נתחי סלמון","לימון","3 שיני שום","2 בטטות"],
+  steps:["חותכים בטטה לקוביות ואופים 15 דקות.","מוסיפים את הדג עם שום ולימון.","אופים עוד 12–15 דקות ב־200 מעלות."]},
+ {id:"cheese-pashtida",name:"פשטידת גבינות",kind:"חלבי",min:50,serves:6,main:["ביצים","גבינה לבנה","קוטג'","גבינה צהובה","קמח"],staple:["מלח"],
+  amounts:["4 ביצים","גביע גבינה לבנה","גביע קוטג'","200 גרם גבינה צהובה","3 כפות קמח"],
+  steps:["מערבבים את כל המרכיבים.","שופכים לתבנית משומנת.","אופים 40 דקות ב־180 מעלות."]},
+ {id:"bolognese",name:"פסטה בולונז",kind:"בשרי",min:35,serves:4,main:["פסטה","בשר טחון","עגבניות מרוסקות","בצל","שום"],staple:["שמן","מלח","תבלינים"],
+  amounts:["500 גרם פסטה","500 גרם בשר טחון","קופסת עגבניות מרוסקות","בצל","2 שיני שום"],
+  steps:["מטגנים בצל ושום, ומוסיפים את הבשר עד שמשחים.","מוסיפים עגבניות ומבשלים 20 דקות.","מגישים מעל הפסטה."]},
+ {id:"veg-ptitim",name:"פתיתים עם ירקות",kind:"פרווה",min:25,serves:4,main:["פתיתים","בצל","גזר","קישואים"],staple:["שמן","מלח","מים"],
+  amounts:["2 כוסות פתיתים","בצל","גזר","קישוא"],
+  steps:["מטגנים בצל וירקות חתוכים.","מוסיפים פתיתים ומקלים 2 דקות.","מוסיפים 3 כוסות מים רותחים ומבשלים 10 דקות."]},
+ {id:"omelette",name:"חביתת ירק",kind:"פרווה",min:10,serves:2,main:["ביצים","בצל"],staple:["שמן","מלח"],
+  amounts:["4 ביצים","בצל ירוק או בצל","פטרוזיליה (לא חובה)"],
+  steps:["טורפים ביצים עם בצל קצוץ ומלח.","מטגנים במחבת משומנת 2–3 דקות מכל צד."]},
+];
+const recSettings=()=>({mode:settings.recMode||"pct",pct:settings.recPct??80,staples:settings.staples||STAPLES_DEFAULT});
+function matchRecipes(){
+  const S=recSettings(),have=new Set(S.staples);
+  for(const i of Object.values(items))if(i.qty>0){const g=ingredientOf(i);if(g)have.add(g)}
+  return RECIPES.map(r=>{const got=r.main.filter(x=>have.has(x)),miss=r.main.filter(x=>!have.has(x)),stMiss=r.staple.filter(x=>!have.has(x));
+    return {...r,got,miss,stMiss,pct:Math.round(got.length/r.main.length*100)}})
+   .filter(r=>S.mode==="all"?r.miss.length===0:r.pct>=S.pct)
+   .sort((a,b)=>a.miss.length-b.miss.length||b.pct-a.pct);
+}
+let recKind="הכל";
+function openRecipes(){
+  current={recipes:true};openSheet();
+  const S=recSettings(),all=matchRecipes(),list=recKind==="הכל"?all:all.filter(r=>r.kind===recKind);
+  const kinds=["הכל","בשרי","חלבי","פרווה"];
+  const kindCls={"בשרי":"k-meat","חלבי":"k-dairy","פרווה":"k-parve"};
+  $("#sheet").innerHTML=`<h2>מה מבשלים היום?</h2>
+    <p class="row-sub" style="margin:-4px 0 10px">${S.mode==="all"?"רק מתכונים שכל המרכיבים שלהם בבית":`מתכונים שיש בבית לפחות ${S.pct}% מהמרכיבים העיקריים שלהם`} · <a href="#" id="rec-set">שינוי</a></p>
+    <div class="rec-kinds" role="group" aria-label="סוג מנה">${kinds.map(k=>`<button type="button" data-kind="${k}" aria-pressed="${recKind===k}">${k}</button>`).join("")}</div>
+    ${list.length?list.map(r=>`<details class="rec">
+      <summary><span class="rec-top"><b>${esc(r.name)}</b><span class="rec-kind ${kindCls[r.kind]}">${r.kind}</span></span>
+        <span class="rec-meta">${r.min} דק' · ${r.serves} מנות · ${r.miss.length?`חסר: ${r.miss.map(esc).join(", ")}`:"יש הכל בבית ✓"}</span>
+        <span class="rec-bar" aria-label="${r.pct}% מהמרכיבים בבית"><i style="width:${r.pct}%"></i></span></summary>
+      <div class="rec-body">
+        <h4>מרכיבים</h4><ul>${r.amounts.map(a=>`<li>${esc(a)}</li>`).join("")}</ul>
+        <h4>אופן ההכנה</h4><ol>${r.steps.map(x=>`<li>${esc(x)}</li>`).join("")}</ol>
+        ${r.miss.length?`<button class="btn primary" type="button" data-recmiss="${r.id}">הוסף את החסר לרשימה (${r.miss.length})</button>`:""}
+      </div></details>`).join("")
+    :`<div class="empty-state" style="box-shadow:none;background:var(--sunk)"><strong>אין מתכון שמתאים כרגע</strong>${S.mode==="all"?"נסו את ההגדרה \"לפחות 80% מהמרכיבים\", או הוסיפו מוצרים למלאי.":"הורידו את האחוז בהגדרות, או הוסיפו מוצרים למלאי."}</div>`}
+    <div class="actions"><button class="btn" id="cancel" type="button">סגירה</button></div>`;
+  $("#cancel").onclick=closeSheet;
+  $("#rec-set").onclick=e=>{e.preventDefault();openSettings()};
+  $("#sheet").querySelectorAll("[data-kind]").forEach(b=>b.onclick=()=>{recKind=b.dataset.kind;openRecipes()});
+  $("#sheet").querySelectorAll("[data-recmiss]").forEach(b=>b.onclick=()=>{
+    const r=all.find(x=>x.id===b.dataset.recmiss);if(!r)return;let n=0;
+    for(const g of r.miss){const ex=Object.values(items).find(i=>ingredientOf(i)===g);
+      if(ex){if(!ex.onList){putItem({...ex,onList:true});n++}}else{putItem({id:newId(),name:g,category:"אחר",qty:0,onList:true,barcodes:[],ingredient:g});n++}}
+    toast(n?`${n} מוצרים נוספו לרשימה`:"הכל כבר ברשימה");b.disabled=true;
+  });
+}
+$("#recipes-btn").onclick=openRecipes;
+
 $("#theme-btn").onclick=()=>{const i=THEMES.findIndex(x=>x[0]===theme);theme=THEMES[(i+1)%THEMES.length][0];try{localStorage.setItem("pantry.theme",theme)}catch(e){}applyTheme()};
 applyTheme();
 
